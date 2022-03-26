@@ -1,0 +1,12 @@
+<a href="{%url 'ShiftManagementApp:index'%}"><<戻る</a>
+{% if detaildate %}
+    {%for a in detaildate%}
+<!--detaildateはすでにpkでフィルターされたあとなので配列ではない-->
+    <li>
+        ユーザーID:{{a.user_id}}<br>
+        日付:{{a.date}}<br>
+        開始時間:{{a.begin}}<br>
+        終了時間:{{a.finish}}<br>
+    </li>
+    {%endfor%}
+{%endif%}

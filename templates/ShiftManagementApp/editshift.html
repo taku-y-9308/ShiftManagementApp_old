@@ -1,0 +1,368 @@
+{% load static %}
+{{ shift_data|json_script:"shift_data" }}
+<!doctype html>
+<html lang="ja">
+  <head>
+    <title>ShiftManagementApp</title>
+    <meta name="csrf-token" content={% csrf_token %}>
+    <!-- Bootstrap CSS -->
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="{% static 'ShiftManagementApp/starter-template.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+    <link href="{% static 'ShiftManagementApp/main.css' %}" rel='stylesheet' />
+    <script src="{% static 'ShiftManagementApp/main.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="{%static 'ShiftManagementApp/gantt-style.css'%}">
+    <link rel="stylesheet" href="http://taitems.github.com/UX-Lab/core/css/prettify.css">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet" type="text/css">
+    <!--JQuery読み込み-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!--moment.js読み込み-->
+    <script src='https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js'></script>
+    <!--Googlechart読み込み-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+   
+    <!--
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['timeline']});
+        google.charts.setOnLoadCallback(drawChart);
+        const shift_data = JSON.parse(document.getElementById("shift_data").textContent);
+        function drawChart() {
+            var container = document.getElementById('timeline');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'name' });
+            dataTable.addColumn({ type: 'string', id: 'barlabel' });
+            dataTable.addColumn({ type: 'string', id: 'style' ,role: 'style' });
+            dataTable.addColumn({ type: 'date', id: 'start' });
+            dataTable.addColumn({ type: 'date', id: 'end' });
+            /*barlabelの場所（カラム２）は何も入れなくても存在してないとうまく動かない*/
+            for (let i=0;i<shift_data.length;i++){
+                let name = shift_data[i]['name'];
+                let style = shift_data[i]['style'];
+                let start = shift_data[i]['start'];
+                let end = shift_data[i]['end'];
+                
+                dataTable.addRows([
+                    [name,'',style,new Date(start),new Date(end)]
+                ]);
+            }
+            chart.draw(dataTable);
+        }
+
+      </script>
+    -->
+    <!--日付を入力し「送信」ボタンをクリックした時の動作-->
+      <script>
+        $(document).on('click','#submit-date',function () {
+            
+            axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+            axios.defaults.xsrfCookieName = "csrftoken"
+            
+            $('#submit-date').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
+            $('#submit-date').click(function show_shift(){
+                axios
+                    .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/',{
+                            "date":$('#edit-date').val()
+                        })
+                    .then((res)=>{
+                        
+                        google.charts.load('current', {'packages':['timeline']});
+                        google.charts.setOnLoadCallback(drawChart);
+                        function drawChart() {
+                            var container = document.getElementById('timeline');
+                            var chart = new google.visualization.Timeline(container);
+                            var dataTable = new google.visualization.DataTable();
+
+                            dataTable.addColumn({ type: 'string', id: 'name' });
+                            dataTable.addColumn({ type: 'string', id: 'shift_id' });
+                            dataTable.addColumn({ type: 'string', id: 'style' ,role: 'style' });
+                            dataTable.addColumn({ type: 'date', id: 'start' });
+                            dataTable.addColumn({ type: 'date', id: 'end' });
+                            /*barlabelの場所（カラム２）は何も入れなくても存在してないとうまく動かない*/
+                            for (let i=0;i<res.data.length;i++){
+                                let name = res.data[i]['name'];
+                                let shift_id = String(res.data[i]['shift_id']);
+                                let style = res.data[i]['style'];
+                                let start = res.data[i]['start'];
+                                let end = res.data[i]['end'];
+                                
+                                dataTable.addRows([
+                                    [name,shift_id,style,new Date(start),new Date(end)]
+                                ]);
+                            }
+                            let option = {
+                                timeline:{
+                                    showBarLabels:false//バーラベルをOFF、shift_idが入ってる
+                                },
+                                tooltip:{//ツールチップ（マウスオーバーで出てくるやつをOFF）
+                                    trigger:'none'
+                                }
+                            }
+
+                            chart.draw(dataTable,option);
+                            console.log(dataTable);
+                            //クリックイベントを拾う
+                            google.visualization.events.addListener(chart, 'select', function (e) {
+                                
+                                var selection = chart.getSelection();
+                                let row = selection['0']['row']
+                                console.log(row);//選択したバーのdataTableにおけるrow
+                                console.log(dataTable['Wf'][row]['c']['1']['v']);//shift_idを表示
+
+                                const shift_id_modal = dataTable['Wf'][row]['c']['1']['v'];
+                                const date_modal = moment(dataTable['Wf'][row]['c']['3']['v']).format('YYYY-MM-DD');
+                                const start_modal = moment(dataTable['Wf'][row]['c']['3']['v']).format('YYYY-MM-DDTHH:mm');
+                                const end_modal = moment(dataTable['Wf'][row]['c']['4']['v']).format('YYYY-MM-DDTHH:mm');
+                                console.log(typeof(dataTable['Wf'][row]['c']['2']['v'])); 
+                                let position;
+                                if (dataTable['Wf'][row]['c']['2']['v'] == '#0000ff'){//blue
+                                    position = 'True';
+                                }else if(dataTable['Wf'][row]['c']['2']['v'] == '#ff0000'){//red
+                                    position = 'False';
+                                }else{
+                                    console.log('不正な値')
+                                }
+                                console.log(position);
+                                $('#shift_id').val(shift_id_modal)
+                                $('#date').val(date_modal);
+                                $('#position').val(position);
+                                $('#start').val(start_modal);
+                                $('#end').val(end_modal);
+                                $('#testModal').modal('show');
+                                $('#submit-shift').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
+                                /*モーダル内の送信ボタンを押したときの動作*/
+                                $('#submit-shift').click(function(){
+                                    axios
+                                        .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/post-shiftdata/',{
+                                            "id":Number($('#shift_id').val()),//int型に変換
+                                            "member":null,
+                                            "position":($('#position').val()),
+                                            "date":$('#edit-date').val(),
+                                            "start":$('#start').val(),
+                                            "end":$('#end').val()
+                                        })
+                                        .then((res)=>{
+                                            //alert('送信成功');
+                                            $('#testModal').modal('hide');//modalを閉じる
+                                            show_shift();//シフト表再描画させる
+                                        })
+                                        .catch(()=>{
+                                            alert('送信失敗');
+                                        })
+
+                                });
+                                /*モーダル内の削除ボタンを押したときの動作*/
+                                $('#delete-shift').click(function(){
+                                    axios
+                                        .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/delete-shiftdata/',{
+                                            "id":Number($('#shift_id').val()),//int型に変換
+                                        })
+                                        .then((res)=>{
+                                            //alert('送信成功');
+                                            $('#testModal').modal('hide');//modalを閉じる
+                                            show_shift();//シフト表再描画させる
+                                        })
+                                        .catch(()=>{
+                                            alert('送信失敗');
+                                        })
+                                })
+                            });
+                        }
+                    })
+                    .catch(()=>{
+                        alert("送信失敗");
+                    })
+            })
+
+        });
+      </script>
+
+      <!--「新規シフト作成」をクリックした時の動作-->
+      <script>
+          $(document).on('click','#create-newshift',function () {
+            axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+            axios.defaults.xsrfCookieName = "csrftoken"
+            $('#submit-newshift-modal').modal('show');
+            $('#submit-newshift').off('click');
+            $('#submit-newshift').click(function(){
+                let member = document.getElementById('submit-newshift-member').value;
+                console.log(member);
+                axios
+                    .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/post-shiftdata/',{
+                        "id":null,
+                        "member":Number(member),
+                        "position":($('#position').val()),
+                        "date":$('#submit-newshift-date').val(),
+                        "start":$('#submit-newshift-start').val(),
+                        "end":$('#submit-newshift-end').val()
+                    })
+                    .then((res)=>{
+                        //alert('送信成功');
+                        $('#submit-newshift-modal').modal('hide');//modalを閉じる
+                        
+                    })
+                    .catch(()=>{
+                        alert('送信失敗');
+                    })
+            })
+          });
+      </script>
+  </head>
+  
+  <body>
+    <a id="skippy" class="sr-only sr-only-focusable" href="#content">
+  <div class="container">
+    <span class="skiplink-text">Skip to main content</span>
+  </div>
+    </a>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="{%url 'ShiftManagementApp:index'%}">ホーム <span class="sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{%url 'ShiftManagementApp:edit-shift'%}">シフト編集</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{%url 'ShiftManagementApp:Logout' %}">ログアウト</a>
+            </li>
+            </ul>
+        </div>
+    </nav>
+
+<main role="main" class="container">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-5">
+                <input type="date" class="form-control"  placeholder="タップして日付を入力" id="edit-date">
+            </div>
+            <button type="button" class="btn btn-primary mr-3" id="submit-date">送信</button>
+            <button type="button" class="btn btn-secondary" id="create-newshift">新規シフト作成</button>
+        </div>
+    </div>
+    <br><br>
+    <div id="timeline" style="height: 1000px;"></div>
+
+</main><!-- /.container -->
+    <!-- タイムラインをクリックした時に表示するモーダルの内容 -->
+    <div class="modal fade" id="testModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">シフト編集</h4>
+                </div>
+                <div class="modal-body">
+                    <label>シフト希望を入力してください</label>
+                    <form action="" id="form">
+                        <div class="form-group">
+                            <label class="control-label">シフトID</label>
+                            <input class="form-control" type="number" id="shift_id" readonly><!--readonlyで編集不可-->
+                        </div>
+                        <div class="form-group">
+                        <label class="control-label">日付</label>
+                        <input class="form-control" type="date" id="date" readonly>
+                        </div>
+                        <div class="form-group">
+                        <label class="control-label">ポジション</label><br>
+                        <select class="form-control" name="position" id="position">
+                            <option value="False">キッチン</option>
+                            <option value="True">ホール</option>
+                        </select>
+                        </div>
+                        <div class="form-group">
+                        <label class="control-label">出勤</label>
+                        <input class="form-control" type="datetime-local" id="start">
+                        </div>
+                        <div class="form-group">
+                        <label class="control-label">退勤</label>
+                        <input class="form-control" type="datetime-local" id="end">
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+                        <button type="button" class="btn btn-outline-danger" id="delete-shift">削除</button>
+                        <button type="button" class="btn btn-danger" type="submit" id="submit-shift">決定</button>
+
+                    </div>
+    
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+
+           <!-- 新規シフト作成ボタンをクリックした時に表示するモーダルの内容 -->
+    <div class="modal fade" id="submit-newshift-modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">新規シフト作成</h4>
+                </div>
+                <div class="modal-body">
+                    <label>追加したいシフト情報を入力してください</label>
+                    <form action="" id="form">
+                        <div class="form-group">
+                        <label class="control-label">従業員名</label><br>
+                        <select class="form-control" id="submit-newshift-member">
+                            {%for member in members%}
+                            <option value={{member.id}} >{{member.username}}</option>
+                            {%endfor%}
+                        </select>
+                        </div>
+                        <div class="form-group">
+                        <label class="control-label form-select">ポジション</label><br>
+                        <select class="form-control" id="submit-newshift-position">
+                            <option value="False">キッチン</option>
+                            <option value="True">ホール</option>
+                        </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">日付</label>
+                            <input class="form-control" type="date" id="submit-newshift-date">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">出勤</label>
+                            <input class="form-control" type="datetime-local" id="submit-newshift-start">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">退勤</label>
+                            <input class="form-control" type="datetime-local" id="submit-newshift-end">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+                            <button type="button" class="btn btn-danger" type="submit" id="submit-newshift">決定</button>
+                    </div>
+    
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+
+    
+<script>
+  window.jQuery || document.write('<script src="{% static 'ShiftManagementApp/jquery-slim.min.js' %}"><\/script>')
+</script><script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script><script src="/docs/4.3/assets/js/vendor/anchor.min.js"></script>
+<script src="/docs/4.3/assets/js/vendor/clipboard.min.js"></script>
+<script src="/docs/4.3/assets/js/vendor/bs-custom-file-input.min.js"></script>
+<script src="/docs/4.3/assets/js/src/application.js"></script>
+<script src="/docs/4.3/assets/js/src/search.js"></script>
+<script src="/docs/4.3/assets/js/src/ie-emulation-modes-warning.js"></script>
+<!--- slim版なのでコメントアウト
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+</html>
+
