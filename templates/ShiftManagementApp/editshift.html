@@ -65,7 +65,7 @@
             $('#submit-date').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
             $('#submit-date').click(function show_shift(){
                 axios
-                    .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/',{
+                    .post("{%url 'ShiftManagementApp:edit-shift-Ajax' %}",{
                             "date":$('#edit-date').val()
                         })
                     .then((res)=>{
@@ -137,7 +137,7 @@
                                 /*モーダル内の送信ボタンを押したときの動作*/
                                 $('#submit-shift').click(function(){
                                     axios
-                                        .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/post-shiftdata/',{
+                                        .post("{%url 'ShiftManagementApp:edit-shift-Ajax-post-shiftdata'%}",{
                                             "id":Number($('#shift_id').val()),//int型に変換
                                             "member":null,
                                             "position":($('#position').val()),
@@ -158,7 +158,7 @@
                                 /*モーダル内の削除ボタンを押したときの動作*/
                                 $('#delete-shift').click(function(){
                                     axios
-                                        .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/delete-shiftdata/',{
+                                        .post("{%url 'ShiftManagementApp:edit-shift-Ajax-delete-shiftdata'%}",{
                                             "id":Number($('#shift_id').val()),//int型に変換
                                         })
                                         .then((res)=>{
@@ -192,7 +192,7 @@
                 let member = document.getElementById('submit-newshift-member').value;
                 console.log(member);
                 axios
-                    .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/post-shiftdata/',{
+                    .post("{url 'ShiftManagementApp:edit-shift-Ajax-post-shiftdata'}",{
                         "id":null,
                         "member":Number(member),
                         "position":($('#position').val()),
