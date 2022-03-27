@@ -61,7 +61,7 @@
                     //イベント追加する時使うためidは保持しておく
                     let shift_id = info.event.id;
                     axios
-                        .post('http://127.0.0.1:8000/ShiftManagementApp/SubmitShift-Ajax/',{
+                        .post("{%url 'ShiftManagementApp:SubmitShift-Ajax' %}",{
                             'date':$('#date').val(),
                             'start':$('#start').val(),
                             'end':$('#end').val(),
@@ -125,7 +125,7 @@
                 $('#delete-shift').off('click');
                 $('#delete-shift').click(function(){
                     axios
-                        .post('http://127.0.0.1:8000/ShiftManagementApp/edit-shift-Ajax/delete-shiftdata/',{
+                        .post("{%url 'ShiftManagementApp:edit-shift-Ajax-delete-shiftdata' %}",{
                             'id':$('#shift_id').val()
                         })
                         .then((res)=>{
