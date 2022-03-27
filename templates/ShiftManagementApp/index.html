@@ -163,7 +163,7 @@
                 $('#submit').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
                 $('#submit').click(function(){
                     axios
-                        .post('http://127.0.0.1:8000/ShiftManagementApp/SubmitShift-Ajax/',{
+                        .post("{% url 'ShiftManagementApp:SubmitShift-Ajax' %}",{
                             'id':null,
                             'date':$('#date').val(),
                             'start':$('#start').val(),
