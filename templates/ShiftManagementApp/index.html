@@ -30,17 +30,19 @@
             headerToolbar: {
               left: 'prev,next today',
               center: 'title',
-              right: 'dayGridMonth,listMonth'
+              right: 'listMonth,dayGridMonth,timeGridWeek'
             },
             navLinks: true, // can click day/week names to navigate views
             editable: true,
             selectable: true,
             eventBackgroundColor:'ff0000',
+            contentHeight: 'auto',
             selectLongPressDelay:0,
             eventTimeFormat:{
                 hour: 'numeric',
                 minute: '2-digit',
-                meridiem: false
+                omitZeroMinute: true,
+                meridiem: 'narrow'
                 },
 
             eventClick: function (info){ //イベントクリックで実行
@@ -170,20 +172,27 @@
                             'end':$('#end').val()
                         })
                         .then((res)=>{
-                            let shift_id = res.data[0]['shift_id'];
-                            //カレンダーに新しいイベントを追加
-                            calendar.addEvent({
-                            id : shift_id,
-                            start : $('#start').val(),
-                            end : $('#end').val(),
-                            borderColor : '#ff0000',
+                            console.log(res.data[0]['res_code']==true);
+                            if(res.data[0]['res_code']==true){
+                                console.log('true');
+                                let shift_id = res.data[0]['shift_id'];
+                                //カレンダーに新しいイベントを追加
+                                calendar.addEvent({
+                                    id : shift_id,
+                                    start : $('#start').val(),
+                                    end : $('#end').val(),
+                                    borderColor : '#ff0000',
+                                })   
+                            }else{
+                                console.log('else')
+                                alert("そのシフトは編集できません")
+                            }
                         })
-                        .catch(()=>{
-                            alert("送信失敗しました。再読み込みしてください");
-                        })
-
-                    });
-                    $('#testModal').modal('hide'); //modalを閉じる
+                        .catch((error)=>{
+                                console.log(error.response);
+                                alert("送信失敗しました。再読み込みしてください。");
+                            })
+                        $('#testModal').modal('hide'); //modalを閉じる
                     
                 });
             },
@@ -333,8 +342,7 @@
     </nav>
 
 <main role="main" class="container">
-    <h4><font color="red">{{ User.username }}</font>さんようこそ</h4>
-
+    <p class="h6 text-right">ログイン中:{{User.username}}さん</p>
     <div class="container">
       <div class="row mb-5">
           <div class="col-2">

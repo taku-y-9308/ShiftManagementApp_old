@@ -1,8 +1,8 @@
 from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
-from datetime import date
 from email.policy import default
+from xmlrpc.client import boolean
 from django.views import generic
 from ShiftManagementApp.models import User,Shift
 from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount
@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
-import json
+import json,datetime
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import Http404
@@ -84,45 +84,83 @@ def submitshift(request):
     datas = json.loads(request.body)
     print(datas)
     print(request.user.id)
-    
-    '''
-    ShiftのidをカレンダーのIDとして渡す
-    更新のときはIDを使って更新
-    '''
-    default_position = User.objects.get(id=request.user.id).default_position
-    #idがShiftに存在していたらupdate,id = nullだと存在しないためcreate
-    product,created = Shift.objects.update_or_create(
-        id = datas['id'],
-        defaults = {
-            'user':request.user,
-            'date':datas['date'],
-            'begin':datas['start'],
-            'finish':datas['end'],
-            'position': default_position
-        }
-    )
-    print(product.id)
+    #送信された日付が現在編集可能な場合
+    if Judge_editable(datas['start']):
 
-    events = Shift.objects.filter(user=request.user.id)
-    response = []
-    #create または　updateしたオブジェクトのidを格納
-    response.append({
-        'shift_id':product.id
-    })
-    '''
-    for event in events:
-    
+        '''
+        ShiftのidをカレンダーのIDとして渡す
+        更新のときはIDを使って更新
+        '''
+        default_position = User.objects.get(id=request.user.id).default_position
+        #idがShiftに存在していたらupdate,id = nullだと存在しないためcreate
+        product,created = Shift.objects.update_or_create(
+            id = datas['id'],
+            defaults = {
+                'user':request.user,
+                'date':datas['date'],
+                'begin':datas['start'],
+                'finish':datas['end'],
+                'position': default_position
+            }
+        )
+        print(product.id)
+
+        events = Shift.objects.filter(user=request.user.id)
+        response = []
+        #create または　updateしたオブジェクトのidを格納
         response.append({
-            'id':event.id,
-            'date':event.date,
-            'start':event.begin,
-            'end':event.finish,
-
+            'res_code':True,
+            'shift_id':product.id
         })
-        #print(response)
+        '''
+        for event in events:
+        
+            response.append({
+                'id':event.id,
+                'date':event.date,
+                'start':event.begin,
+                'end':event.finish,
+
+            })
+            #print(response)
+        '''
+        print("編集可能")
+        return JsonResponse(response,safe=False)
+
+    #送信された日付が編集可能ではないとき
+    else:
+        response = []
+        response.append({
+            'res_code':False
+        })
+        print("編集不可")
+        return JsonResponse(response,safe=False)
+
+'''
+date_str :YYYY-mm-ddTHH:MM
+'''
+def Judge_editable(date_str):
+    '''
+    TimeZone:JST で統一
     '''
 
-    return JsonResponse(response,safe=False)
+    #現在の日本時間出力
+    t_delta = datetime.timedelta(hours=9)
+    JST = datetime.timezone(t_delta, 'JST')
+    dt_JST = datetime.datetime.now(JST)
+    print(date_str)
+    #引数の日付をDate型に変換
+    date = datetime.datetime.strptime(date_str+':00+0900','%Y-%m-%dT%H:%M:%S%z')
+
+    # 2022-04-05が与えられたら2022-04-01~2022-04-20に変換
+    #すべての時刻をタイムゾーンをJSTにする
+    start_date = datetime.datetime(date.year,date.month-1,date.replace(day=1).day,tzinfo=JST)
+    end_date = datetime.datetime(date.year,date.month-1,20,tzinfo=JST)
+    #与えられた日付が編集可能な時期がを判定
+    if start_date<dt_JST<end_date:
+        return True
+    else:
+        return False
 
 '''
 シフト編集画面のトップページ表示用
