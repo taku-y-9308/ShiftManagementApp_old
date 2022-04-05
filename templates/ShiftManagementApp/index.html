@@ -4,7 +4,6 @@
 <html lang="ja">
   <head>
     <title>ShiftManagementApp</title>
-    <meta name="csrf-token" content={% csrf_token %}>
     <!-- Bootstrap CSS -->
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -348,17 +347,7 @@
       </div>
   </div>
   
-  <div id='calendar'></div>
-
-    <a href="{%url 'ShiftManagementApp:SubmitShift'%}">シフト提出</a>
-    {%if indexview%}
-        {%for a in indexview%}
-            <ul>
-                <li><a href="{%url 'ShiftManagementApp:detaildate' a.id%}">{{a.date}}</a></li>
-            </ul>
-        {%endfor%}
-    {%endif%}
-     
+  <div id='calendar'></div>     
     <!-- モーダルの内容 -->
     <div class="modal fade" id="testModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
       <div class="modal-dialog">
