@@ -192,7 +192,7 @@
                 let member = document.getElementById('submit-newshift-member').value;
                 console.log(member);
                 axios
-                    .post("{url 'ShiftManagementApp:edit-shift-Ajax-post-shiftdata'}",{
+                    .post("{% url 'ShiftManagementApp:edit-shift-Ajax-post-shiftdata' %}",{
                         "id":null,
                         "member":Number(member),
                         "position":($('#position').val()),
