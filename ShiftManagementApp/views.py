@@ -222,7 +222,7 @@ def editshift_ajax(request):
             arr2.append(arr)
         
         return JsonResponse(arr2,safe=False)
-    #staffユーザー出ない場合
+    #staffユーザーではない場合
     else:
         return HttpResponse('アクセス権がありません')
 
@@ -235,37 +235,43 @@ def editshift_ajax_post_shiftdata(request):
     #GETリクエストなら404を返す
     if request.method == 'GET':
         raise Http404()
-    datas = json.loads(request.body)
-    id = datas['id']
 
-    #更新のときはmemberはNoneで送信
-    if datas['member'] is None:
-        user = Shift.objects.get(id=id).user
-    #新規作成のときはmemberにuserをPKから参照
+    #スタッフユーザー(管理ユーザー)のみ実行可 
+    if request.user.is_staff:
+        datas = json.loads(request.body)
+        id = datas['id']
+
+        #更新のときはmemberはNoneで送信
+        if datas['member'] is None:
+            user = Shift.objects.get(id=id).user
+        #新規作成のときはmemberにuserをPKから参照
+        else:
+            user = User.objects.get(id=datas['member'])
+        print(user)
+
+        #str→bool型に変換
+        if datas['position'] == 'True':
+            position = True
+        else :
+            position = False
+        product,created = Shift.objects.update_or_create(
+            id = id,
+            defaults = {
+                'user':user,
+                'position': position,
+                'date':datas['date'],
+                'begin':datas['start'],
+                'finish':datas['end']
+            }
+        )
+        print(product)
+        print(created)
+
+        return JsonResponse({'':''})
+
+    #staffユーザーではない場合
     else:
-        user = User.objects.get(id=datas['member'])
-    print(user)
-
-    #str→bool型に変換
-    if datas['position'] == 'True':
-        position = True
-    else :
-        position = False
-    product,created = Shift.objects.update_or_create(
-        id = id,
-        defaults = {
-            'user':user,
-            'position': position,
-            'date':datas['date'],
-            'begin':datas['start'],
-            'finish':datas['end']
-        }
-    )
-    print(product)
-    print(created)
-
-
-    return JsonResponse({'':''})
+        return HttpResponse('アクセス権がありません')
 
 '''
 削除リクエストの送信先

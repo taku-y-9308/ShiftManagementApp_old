@@ -17,44 +17,34 @@
     <link rel="stylesheet" href="{%static 'ShiftManagementApp/gantt-style.css'%}">
     <link rel="stylesheet" href="http://taitems.github.com/UX-Lab/core/css/prettify.css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="{% static 'ShiftManagementApp/loading.css' %}">
     <!--JQuery読み込み-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <!--moment.js読み込み-->
     <script src='https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js'></script>
     <!--Googlechart読み込み-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-   
-    <!--
-    <script type="text/javascript">
-        google.charts.load('current', {'packages':['timeline']});
-        google.charts.setOnLoadCallback(drawChart);
-        const shift_data = JSON.parse(document.getElementById("shift_data").textContent);
-        function drawChart() {
-            var container = document.getElementById('timeline');
-            var chart = new google.visualization.Timeline(container);
-            var dataTable = new google.visualization.DataTable();
-
-            dataTable.addColumn({ type: 'string', id: 'name' });
-            dataTable.addColumn({ type: 'string', id: 'barlabel' });
-            dataTable.addColumn({ type: 'string', id: 'style' ,role: 'style' });
-            dataTable.addColumn({ type: 'date', id: 'start' });
-            dataTable.addColumn({ type: 'date', id: 'end' });
-            /*barlabelの場所（カラム２）は何も入れなくても存在してないとうまく動かない*/
-            for (let i=0;i<shift_data.length;i++){
-                let name = shift_data[i]['name'];
-                let style = shift_data[i]['style'];
-                let start = shift_data[i]['start'];
-                let end = shift_data[i]['end'];
-                
-                dataTable.addRows([
-                    [name,'',style,new Date(start),new Date(end)]
-                ]);
+    
+    <!--読込中画面-->
+    <script>
+        //読込中画面の表示
+        function dispLoading(msg){
+            if (msg == undefined){
+                msg = "";
             }
-            chart.draw(dataTable);
-        }
+            let dispmsg = "<div class='loadingmsg'>"+msg+"</div>";
 
-      </script>
-    -->
+            //ローディング画面がまだ表示されてない場合のみ実行
+            if($('#loading').length == 0){
+                $('body').append("<div id='loading'>"+dispmsg+"</div>");   
+            }
+        }
+        //読込中画面の非表示
+        function removeLoading(){
+            $('#loading').remove();
+        }
+    </script>
+
     <!--日付を入力し「送信」ボタンをクリックした時の動作-->
       <script>
         $(document).on('click','#submit-date',function () {
@@ -64,6 +54,7 @@
             
             $('#submit-date').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
             $('#submit-date').click(function show_shift(){
+                dispLoading('Loading...');
                 axios
                     .post("{%url 'ShiftManagementApp:edit-shift-Ajax' %}",{
                             "date":$('#edit-date').val()
@@ -104,6 +95,7 @@
                             }
 
                             chart.draw(dataTable,option);
+                            removeLoading();
                             console.log(dataTable);
                             //クリックイベントを拾う
                             google.visualization.events.addListener(chart, 'select', function (e) {
@@ -136,6 +128,7 @@
                                 $('#submit-shift').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
                                 /*モーダル内の送信ボタンを押したときの動作*/
                                 $('#submit-shift').click(function(){
+                                    dispLoading('Loading...');
                                     axios
                                         .post("{%url 'ShiftManagementApp:edit-shift-Ajax-post-shiftdata'%}",{
                                             "id":Number($('#shift_id').val()),//int型に変換
@@ -151,7 +144,10 @@
                                             show_shift();//シフト表再描画させる
                                         })
                                         .catch(()=>{
-                                            alert('送信失敗');
+                                            alert('送信失敗しました');
+                                        })
+                                        .finally(()=>{
+                                            removeLoading();
                                         })
 
                                 });
@@ -167,7 +163,7 @@
                                             show_shift();//シフト表再描画させる
                                         })
                                         .catch(()=>{
-                                            alert('送信失敗');
+                                            alert('送信失敗しました');
                                         })
                                 })
                             });
@@ -206,7 +202,7 @@
                         
                     })
                     .catch(()=>{
-                        alert('送信失敗');
+                        alert('送信失敗しました');
                     })
             })
           });
