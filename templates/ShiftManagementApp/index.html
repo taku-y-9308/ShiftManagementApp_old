@@ -70,34 +70,18 @@
                             'id':shift_id
                         })
                         .then((res)=>{
-                            console.log(typeof(res.data));
-                            //calendar.getEventSources().remove();
-                            $('#testModal').modal('hide'); //modalを閉じる
-                            //新しいeventDataを取得
-                            eventData = res.data
-                            
-                            /*
-                            var calendar = new FullCalendar.Calendar(calendarEl, {
-                                locale: 'ja',
-                                displayEventEnd :true,
-                                headerToolbar: {
-                                left: 'prev,next today',
-                                center: 'title',
-                                right: 'dayGridMonth,listMonth'
-                                },
-                                navLinks: true, // can click day/week names to navigate views
-                                editable: true,
-                                selectable: true,
-                                eventBackgroundColor:'ff0000',
-                                eventTimeFormat:{
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    meridiem: false
-                                    },
-                                events: eventData,
-                                });
-                                */
- 
+
+                            if(res.data[0]['res_code']==true){
+                                console.log(typeof(res.data));
+                                //calendar.getEventSources().remove();
+                                $('#testModal').modal('hide'); //modalを閉じる
+                                //新しいeventDataを取得
+                                eventData = res.data
+                                alert("送信されました")
+                            }else{
+                                console.log('else')
+                                alert("そのシフトは編集できません")
+                            }
                             
                         })
                         .catch(()=>{
@@ -135,6 +119,7 @@
                             console.log($('#shift_id').val())
                             //calendar.getEventSources().remove();
                             $('#testModal').modal('hide'); //modalを閉じる
+                            alert("削除しました")
                             //新しいeventDataを取得
                             eventData = res.data
                             //カレンダー再描画
@@ -172,6 +157,7 @@
                             'end':$('#end').val()
                         })
                         .then((res)=>{
+                            $('#testModal').modal('hide'); //modalを閉じる
                             console.log(res.data[0]['res_code']==true);
                             if(res.data[0]['res_code']==true){
                                 console.log('true');
@@ -182,7 +168,8 @@
                                     start : $('#start').val(),
                                     end : $('#end').val(),
                                     borderColor : '#ff0000',
-                                })   
+                                });
+                                alert("送信されました");   
                             }else{
                                 console.log('else')
                                 alert("そのシフトは編集できません")
@@ -192,7 +179,7 @@
                                 console.log(error.response);
                                 alert("送信失敗しました。再読み込みしてください。");
                             })
-                        $('#testModal').modal('hide'); //modalを閉じる
+                       
                     
                 });
             },
