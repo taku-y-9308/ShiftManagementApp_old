@@ -2,6 +2,7 @@ from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
 from email.policy import default
+from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
 from ShiftManagementApp.models import User,Shift
@@ -282,14 +283,22 @@ def editshift_ajax_delete_shiftdata(request):
     if request.method == 'GET':
         raise Http404()
     datas = json.loads(request.body)
-    #getは対象が存在しないと例外を返すため念の為try文にしている
-    try:
-        Shift.objects.get(id=datas['id']).delete()
-    except Exception as e:
-        print(e)
-    
-    return JsonResponse({'':''})
- 
+    response = []
+    #編集可能期間かどうか判定
+    if Judge_editable(datas['start']):
+        #getは対象が存在しないと例外を返すため念の為try文にしている
+        try:
+            Shift.objects.get(id=datas['id']).delete()
+            response.append({
+                'res_code':True
+            })
+        except Exception as e:
+            print(e)
+    else:
+        response.append({
+            'res_code':False
+        })
+    return JsonResponse(response,safe=False)
 
 
 

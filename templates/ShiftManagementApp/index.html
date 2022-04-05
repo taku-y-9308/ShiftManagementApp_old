@@ -82,7 +82,7 @@
                                 alert("送信されました")
                             }else{
                                 console.log('else')
-                                alert("そのシフトは編集できません")
+                                alert("編集可能期間が過ぎているため編集できません")
                             }
                             
                         })
@@ -114,25 +114,33 @@
                 $('#delete-shift').click(function(){
                     axios
                         .post("{%url 'ShiftManagementApp:edit-shift-Ajax-delete-shiftdata' %}",{
-                            'id':$('#shift_id').val()
+                            'id':$('#shift_id').val(),
+                            'start':$('#start').val()
                         })
                         .then((res)=>{
                             console.log(res.data);
                             console.log($('#shift_id').val())
-                            //calendar.getEventSources().remove();
-                            $('#testModal').modal('hide'); //modalを閉じる
-                            alert("削除しました")
-                            //新しいeventDataを取得
-                            eventData = res.data
-                            //カレンダー再描画
-                            let event = calendar.getEventById($('#shift_id').val())
-                            event.remove();
-                            calendar.render();
+                            //削除可能期間内の場合
+                            if(res.data[0]['res_code']==true){
+                                //calendar.getEventSources().remove();
+                                alert("削除しました");
+                                //新しいeventDataを取得
+                                eventData = res.data
+                                //カレンダー再描画
+                                let event = calendar.getEventById($('#shift_id').val())
+                                event.remove();
+                                calendar.render();
+                            }else{
+                                alert("削除可能期間外のため削除できません");
+                            }
                             
                         })
                         .catch(()=>{
                             alert("送信失敗しました。再読み込みしてください");
                         })
+                        .finally(()=>{
+                            $('#testModal').modal('hide'); //modalを閉じる
+                        });
                 })
             },
             //日付の枠クリックで実行される
@@ -174,7 +182,7 @@
                                 alert("送信されました");   
                             }else{
                                 console.log('else')
-                                alert("そのシフトは編集できません")
+                                alert("編集可能期間が過ぎているため編集できません")
                             }
                         })
                         .catch((error)=>{
