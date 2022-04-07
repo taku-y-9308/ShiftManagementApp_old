@@ -2,6 +2,7 @@ from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
 from email.policy import default
+from re import A
 from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
@@ -202,25 +203,29 @@ def editshift_ajax(request):
         print(json_data)
 
         arr2 = []
-        shifts = Shift.objects.filter(date=date)
+        #該当のシフトを取得
+        shifts = Shift.objects.select_related('user').filter(date=date)
+        print(shifts[0].user.shop_id)
         for shift in shifts:
-            name = User.objects.get(id=shift.user.id).username
-            print(name)
-            #positionによってバーに適用する色を変える
-            position = shift.position
-            if position == True:
-                style = '#0000ff' #blue
-            else:
-                style = '#ff0000' #red
-            arr = {
-                'shift_id':shift.id,
-                'name':name,
-                'date':shift.date,
-                'style':style,
-                'start':shift.begin,
-                'end':shift.finish,
-            }
-            arr2.append(arr)
+            #管理ユーザーと同じshop_idのシフトのみ表示（他店のシフトは表示しない）
+            if shift.user.shop_id == request.user.shop_id:
+                name = User.objects.get(id=shift.user.id).username
+                print(name)
+                #positionによってバーに適用する色を変える
+                position = shift.position
+                if position == True:
+                    style = '#0000ff' #blue
+                else:
+                    style = '#ff0000' #red
+                arr = {
+                    'shift_id':shift.id,
+                    'name':name,
+                    'date':shift.date,
+                    'style':style,
+                    'start':shift.begin,
+                    'end':shift.finish,
+                }
+                arr2.append(arr)
         
         return JsonResponse(arr2,safe=False)
     #staffユーザーではない場合
