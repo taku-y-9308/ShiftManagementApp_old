@@ -41,7 +41,7 @@ AWS_SES_REGION_NAME="ap-northeast-1"
 
 AWS_SES_REGION_ENDPOINT="email-smtp.ap-northeast-1.amazonaws.com"
 
-EMAIL_BACKEND = "django_ses.SESBackend"
+EMAIL_BACKEND="django_ses.SESBackend"
 
 
 # Application definition
