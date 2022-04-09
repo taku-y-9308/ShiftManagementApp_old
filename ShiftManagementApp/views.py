@@ -2,15 +2,16 @@ from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
 from email.policy import default
-from re import A
+from re import A, template
 from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
 from ShiftManagementApp.models import User,Shift
 from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount
-from django.urls import reverse
+from django.urls import reverse,reverse_lazy
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 import json,datetime
@@ -205,7 +206,7 @@ def editshift_ajax(request):
         arr2 = []
         #該当のシフトを取得
         shifts = Shift.objects.select_related('user').filter(date=date)
-        print(shifts[0].user.shop_id)
+        #print(shifts[0].user.shop_id)
         for shift in shifts:
             #管理ユーザーと同じshop_idのシフトのみ表示（他店のシフトは表示しない）
             if shift.user.shop_id == request.user.shop_id:
@@ -306,7 +307,18 @@ def editshift_ajax_delete_shiftdata(request):
     return JsonResponse(response,safe=False)
 
 
+class PasswordReset(PasswordResetView):
+    template_name = 'ShiftManagementApp/password_reset_form.html'
+    success_url = reverse_lazy('ShiftManagementApp:password_reset_done')
 
+class PasswordResetDone(PasswordResetDoneView):
+    template_name = 'ShiftManagementApp/password_reset_done.html'
+
+class PasswordResetConfirm(PasswordResetConfirmView):
+    template_name = 'ShiftManagementApp/password_reset_confirm.html'
+
+class PasswordResetComplete(PasswordResetCompleteView):
+    template_name = 'ShiftManagementApp/password_reset_complete.html'
 
 class IndexView(generic.ListView):
     template_name = 'ShiftManagementApp/index.html'

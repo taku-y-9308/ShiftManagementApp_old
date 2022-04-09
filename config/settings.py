@@ -32,6 +32,17 @@ DEBUG = env.get_value('DEBUG',cast=bool,default=False)
 #ALLOWED_HOSTS = []
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
+#Email settings
+#AWS_ACCESS_KEY_ID = ""
+
+#AWS_SECRET_ACCESS_KEY = ""
+
+AWS_SES_REGION_NAME="ap-northeast-1"
+
+AWS_SES_REGION_ENDPOINT="email-smtp.ap-northeast-1.amazonaws.com"
+
+EMAIL_BACKEND = "django_ses.SESBackend"
+
 
 # Application definition
 
@@ -43,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_ses'
 ]
 #'django.middleware.csrf.CsrfViewMiddleware'を一時的に削除
 MIDDLEWARE = [
