@@ -316,6 +316,7 @@ class PasswordResetDone(PasswordResetDoneView):
 
 class PasswordResetConfirm(PasswordResetConfirmView):
     template_name = 'ShiftManagementApp/password_reset_confirm.html'
+    success_url = reverse_lazy('ShiftManagementApp:password_reset_complete')
 
 class PasswordResetComplete(PasswordResetCompleteView):
     template_name = 'ShiftManagementApp/password_reset_complete.html'
