@@ -41,20 +41,20 @@ AWS_SES_REGION_NAME="ap-northeast-1"
 
 AWS_SES_REGION_ENDPOINT="email-smtp.ap-northeast-1.amazonaws.com"
 
-EMAIL_BACKEND = "django_ses.SESBackend"
+EMAIL_BACKEND="django_ses.SESBackend"
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'ShiftManagementApp',
+    'django_ses',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_ses'
 ]
 #'django.middleware.csrf.CsrfViewMiddleware'を一時的に削除
 MIDDLEWARE = [
