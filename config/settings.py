@@ -42,6 +42,7 @@ AWS_SES_REGION_NAME="ap-northeast-1"
 AWS_SES_REGION_ENDPOINT="email.ap-northeast-1.amazonaws.com"
 
 EMAIL_BACKEND="django_ses.SESBackend"
+DEFAULT_FROM_EMAIL = 'no-reply@shiftmanagementapp.com'
 
 
 # Application definition
