@@ -49,13 +49,13 @@ DEFAULT_FROM_EMAIL = 'no-reply@shiftmanagementapp.com'
 
 INSTALLED_APPS = [
     'ShiftManagementApp',
+    'django_ses',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_ses'
 ]
 #'django.middleware.csrf.CsrfViewMiddleware'を一時的に削除
 MIDDLEWARE = [
