@@ -39,7 +39,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 AWS_SES_REGION_NAME="ap-northeast-1"
 
-AWS_SES_REGION_ENDPOINT="email-smtp.ap-northeast-1.amazonaws.com"
+AWS_SES_REGION_ENDPOINT="email.ap-northeast-1.amazonaws.com"
 
 EMAIL_BACKEND="django_ses.SESBackend"
 
