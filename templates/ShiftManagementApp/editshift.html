@@ -169,7 +169,10 @@
                         }
                     })
                     .catch(()=>{
-                        alert("送信失敗");
+                        alert("送信失敗しました");
+                    })
+                    .finally(()=>{
+                        removeLoading();
                     })
             })
 
