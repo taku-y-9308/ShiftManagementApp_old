@@ -79,6 +79,7 @@ def home(request):
     }
     return render(request,'ShiftManagementApp/index.html',context=params)
 
+#axiosの送信先
 @login_required
 def submitshift(request):
     if request.method == 'GET':
@@ -140,6 +141,7 @@ def submitshift(request):
         return JsonResponse(response,safe=False)
 
 '''
+シフト提出可能期間かを判定
 date_str :YYYY-mm-ddTHH:MM
 '''
 def Judge_editable(date_str):
@@ -320,54 +322,3 @@ class PasswordResetConfirm(PasswordResetConfirmView):
 
 class PasswordResetComplete(PasswordResetCompleteView):
     template_name = 'ShiftManagementApp/password_reset_complete.html'
-
-class IndexView(generic.ListView):
-    template_name = 'ShiftManagementApp/index.html'
-    model = Shift
-    context_object_name = 'indexview'
-
-class Detaildate(generic.DetailView):
-    template_name = 'ShiftManagementApp/detaildate.html'
-    model = Shift
-    context_object_name = 'detaildate'
-
-class ListViewTest(generic.ListView):
-    template_name = 'ShiftManagementApp/hogehoge.html'
-    queryset = Shift.objects.filter(date='2022-03-01')
-    context_object_name = 'detaildate'
-
-class Detailuser(generic.DetailView):
-    pass
-
-class SubmitShift(generic.CreateView):
-    model = Shift
-    form_class = SubmitShift
-    template_name = 'ShiftManagementApp/SubmitShift.html'
-    def get_success_url(self):
-        return reverse('ShiftManagementApp:index')
-
-class EditShift(generic.UpdateView):
-    model = Shift
-    #form_class = SubmitShift
-    template_name = 'ShiftManagementApp/SubmitShift.html'
-    fields = ('user','date','begin','finish')#fieldsが読み込まれてない？
-    def get_success_url(self):
-        return reverse('ShiftManagementApp:detaildate',kwargs={'pk':self.object.pk})
-
-class DeleteShift(generic.DeleteView):
-    model = Shift
-    context_object_name = 'Shift'
-    template_name = 'ShiftManagementApp/delete.html'
-    def get_success_url(self):
-        return reverse('ShiftManagementApp:index')
-
-def updatelog(request, pk):
-    obj = get_object_or_404(Shift, id=pk)
-    if request.method == "POST":
-        form = SubmitShift(request.POST, instance=obj)
-        if form.is_valid():
-            form.save()
-            return redirect('ShiftManagementApp:detaildate', pk=obj.object.pk)
-    else:
-        form = SubmitShift(instance=obj)
-        return render(request, 'ShiftManagementApp/SubmitShift.html', {'form': form})
