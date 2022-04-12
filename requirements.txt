@@ -1,4 +1,2 @@
 -r requirements-dev.txt
-<<<<<<< HEAD
 gunicorn
->>>>>>> b4bc069da2ce13f04d865b7ce4bdcfb28c995fdd
