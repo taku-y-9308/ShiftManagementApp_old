@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path,include
 
 urlpatterns = [
+    path('',include('ShiftManagementApp.urls')),
     path('admin/', admin.site.urls),
-    path('ShiftManagementApp/',include('ShiftManagementApp.urls')),
+    #path('ShiftManagementApp/',include('ShiftManagementApp.urls')),
 ]
