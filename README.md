@@ -7,6 +7,7 @@ http://shiftmanagementapp.com/ShiftManagementApp
 - Bootstrap 4.3.1
 - Googlechart
 - FullCalender 5.10.2
+- HTML/CSS
   
 **バックエンド**
 - Python 3.6.5
