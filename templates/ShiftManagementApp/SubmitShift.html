@@ -1,6 +1,0 @@
-<a href="{%url 'ShiftManagementApp:index'%}"><<戻る</a>
-<form method="POST">
-    {%csrf_token%}<!--セキュリティ上必ず必要らしい-->
-    {{form.as_p}}<!--formの内容をpタグで囲って表示してくれる、フォームの内容が自動的に作成される-->
-    <button type="submit">save</button>
-</form>
