@@ -20,7 +20,7 @@ jobs:
           script: |
             cd ${{ secrets.SERVER_DEPLOY_DIR }}
             git pull origin main
-            source /home/ec2-user/venv/bin/activate
+            source /home/${{ secrets.SERVER_USERNAME }}/venv/bin/activate
             pkill gunicorn
             gunicorn config.wsgi --bind=0.0.0.0:8000 -D
             sudo systemctl restart nginx
