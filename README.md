@@ -17,4 +17,4 @@ http://shiftmanagementapp.com/ShiftManagementApp
 - AWS
     - EC2,SES,Route53
 
-![Untitled Diagram drawio](https://user-images.githubusercontent.com/66234583/163392198-aea5861a-7170-4c71-a3d3-956be0022e7c.svg)
+![Untitled Diagram drawio-2](https://user-images.githubusercontent.com/66234583/163393473-e558da16-a0a8-4789-9fa7-14de856b99c2.svg)
