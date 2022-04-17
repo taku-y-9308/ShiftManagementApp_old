@@ -34,7 +34,11 @@ def Login(request):
             else:
                 return HttpResponse("アカウントが有効ではありません")
         else:
-            return HttpResponse("ログインIDまたはパスワードが間違っています")
+            error_message = "ログインIDまたはパスワードが違います"
+            params = {
+                "error_message":error_message
+            }
+            return render(request,'ShiftManagementApp/login.html',params)
     # リクエストがGETだった場合
     else:
         return render(request, 'ShiftManagementApp/login.html')
@@ -303,7 +307,7 @@ def editshift_ajax_delete_shiftdata(request):
         except Exception as e:
             print(e)
         return JsonResponse(response,safe=False)
-        
+
     #削除リクエストが一般ユーザーの場合、編集可能期間かどうかで可否を変える
     else:
         #編集可能期間かどうか判定
