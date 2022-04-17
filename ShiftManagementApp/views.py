@@ -291,6 +291,7 @@ def editshift_ajax_delete_shiftdata(request):
     if request.method == 'GET':
         raise Http404()
     datas = json.loads(request.body)
+    print(datas)
     response = []
     #編集可能期間かどうか判定
     if Judge_editable(datas['start']):
