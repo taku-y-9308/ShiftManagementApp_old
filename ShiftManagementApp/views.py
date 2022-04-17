@@ -291,11 +291,10 @@ def editshift_ajax_delete_shiftdata(request):
     if request.method == 'GET':
         raise Http404()
     datas = json.loads(request.body)
-    print(datas)
     response = []
-    #編集可能期間かどうか判定
-    if Judge_editable(datas['start']):
-        #getは対象が存在しないと例外を返すため念の為try文にしている
+
+    #削除リクエストが管理ユーザの場合、無条件で削除実施
+    if request.user.is_staff:
         try:
             Shift.objects.get(id=datas['id']).delete()
             response.append({
@@ -303,11 +302,25 @@ def editshift_ajax_delete_shiftdata(request):
             })
         except Exception as e:
             print(e)
+        return JsonResponse(response,safe=False)
+        
+    #削除リクエストが一般ユーザーの場合、編集可能期間かどうかで可否を変える
     else:
-        response.append({
-            'res_code':False
-        })
-    return JsonResponse(response,safe=False)
+        #編集可能期間かどうか判定
+        if Judge_editable(datas['start']):
+            #getは対象が存在しないと例外を返すため念の為try文にしている
+            try:
+                Shift.objects.get(id=datas['id']).delete()
+                response.append({
+                    'res_code':True
+                })
+            except Exception as e:
+                print(e)
+        else:
+            response.append({
+                'res_code':False
+            })
+        return JsonResponse(response,safe=False)
 
 
 class PasswordReset(PasswordResetView):
