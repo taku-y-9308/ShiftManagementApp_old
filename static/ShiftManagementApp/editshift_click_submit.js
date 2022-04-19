@@ -4,7 +4,6 @@ $(document).on('click','#submit-date',function () {
     axios.defaults.xsrfCookieName = "csrftoken"
     
     $('#submit-date').off('click') //offでクリックイベントを削除することで複数登録を防ぐ
-    $('#submit-date').click(function show_shift(){
         dispLoading('Loading...');
         axios
             .post("/edit-shift-Ajax/",{
@@ -126,6 +125,5 @@ $(document).on('click','#submit-date',function () {
             .finally(()=>{
                 removeLoading();
             })
-    })
 
 });
