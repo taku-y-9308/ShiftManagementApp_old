@@ -23,4 +23,6 @@ jobs:
             source /home/${{ secrets.SERVER_USERNAME }}/venv/bin/activate
             pkill gunicorn
             gunicorn config.wsgi --bind=0.0.0.0:8000 -D
+            python3 manage.py collectstatic
+            yes
             sudo systemctl restart nginx
