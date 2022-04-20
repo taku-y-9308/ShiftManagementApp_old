@@ -1,4 +1,4 @@
-$(document).on('click','#submit-date',function () {
+$(document).on('click','#submit-date',function show_shift() {
             
     axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
     axios.defaults.xsrfCookieName = "csrftoken"
@@ -93,8 +93,9 @@ $(document).on('click','#submit-date',function () {
                                     $('#testModal').modal('hide');//modalを閉じる
                                     show_shift();//シフト表再描画させる
                                 })
-                                .catch(()=>{
+                                .catch((error)=>{
                                     alert('送信失敗しました');
+                                    console.log(error);
                                 })
                                 .finally(()=>{
                                     removeLoading();

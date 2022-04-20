@@ -1,24 +1,11 @@
+{% extends "ShiftManagementApp/base.html" %}
 {% load static %}
-{{ shift_data|json_script:"shift_data" }}
-<!doctype html>
-<html lang="ja">
-  <head>
-    <title>ShiftManagementApp</title>
-    <!-- Bootstrap CSS -->
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <link href="{% static 'ShiftManagementApp/starter-template.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
-    <link href="{% static 'ShiftManagementApp/main.css' %}" rel='stylesheet' />
-    <script src="{% static 'ShiftManagementApp/main.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="{%static 'ShiftManagementApp/gantt-style.css'%}">
-    <link rel="stylesheet" href="http://taitems.github.com/UX-Lab/core/css/prettify.css">
-    <link rel="stylesheet" href="{% static 'ShiftManagementApp/loading.css' %}">
-    <!--JQuery読み込み-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <!--moment.js読み込み-->
-    <script src='https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js'></script>
+{% block title%}
+ShiftManagementApp
+{%endblock%}
+
+{%block header%}
     <!--Googlechart読み込み-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{%static 'ShiftManagementApp/loading.js'%}"></script>
@@ -26,147 +13,113 @@
     <script src="{%static 'ShiftManagementApp/editshift_click_submit.js'%}"></script>
     <!--「新規シフト作成」をクリックした時の動作-->
     <script src="{% static 'ShiftManagementApp/editshift_click_newshift.js'%}"></script>
+{%endblock%}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> 
-  </head>
-  
-  <body>
-    <a id="skippy" class="sr-only sr-only-focusable" href="#content">
-    </a>
-
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="{%url 'ShiftManagementApp:index'%}">ホーム <span class="sr-only"></span></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{%url 'ShiftManagementApp:edit-shift'%}">シフト編集</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{%url 'ShiftManagementApp:Logout' %}">ログアウト</a>
-            </li>
-            </ul>
+{%block contents%}
+<div class="container">
+    <div class="row">
+        <div class="col-5">
+            <input type="date" class="form-control"  placeholder="タップして日付を入力" id="edit-date">
         </div>
-    </nav>
+        <button type="button" class="btn btn-primary mr-3" id="submit-date">送信</button>
+        <button type="button" class="btn btn-secondary" id="create-newshift">新規シフト作成</button>
+    </div>
+</div>
+<div id="timeline" class="mt-4" style="height: 1000px;"></div>
 
-<main role="main" class="container">
 
-    <div class="container">
-        <div class="row">
-            <div class="col-5">
-                <input type="date" class="form-control"  placeholder="タップして日付を入力" id="edit-date">
+<!-- タイムラインをクリックした時に表示するモーダルの内容 -->
+<div class="modal fade" id="testModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">シフト編集</h4>
             </div>
-            <button type="button" class="btn btn-primary mr-3" id="submit-date">送信</button>
-            <button type="button" class="btn btn-secondary" id="create-newshift">新規シフト作成</button>
+            <div class="modal-body">
+                <label>シフト希望を入力してください</label>
+                <form action="" id="form">
+                    <div class="form-group">
+                        <label class="control-label">シフトID</label>
+                        <input class="form-control" type="number" id="shift_id" readonly><!--readonlyで編集不可-->
+                    </div>
+                    <div class="form-group">
+                    <label class="control-label">日付</label>
+                    <input class="form-control" type="date" id="date" readonly>
+                    </div>
+                    <div class="form-group">
+                    <label class="control-label">ポジション</label><br>
+                    <select class="form-control" name="position" id="position">
+                        <option value="False">キッチン</option>
+                        <option value="True">ホール</option>
+                    </select>
+                    </div>
+                    <div class="form-group">
+                    <label class="control-label">出勤</label>
+                    <input class="form-control" type="datetime-local" id="start">
+                    </div>
+                    <div class="form-group">
+                    <label class="control-label">退勤</label>
+                    <input class="form-control" type="datetime-local" id="end">
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+                    <button type="button" class="btn btn-outline-danger" id="delete-shift">削除</button>
+                    <button type="button" class="btn btn-danger" type="submit" id="submit-shift">決定</button>
+
+                </div>
+
+                </form>
+            </div>
+            </div>
         </div>
     </div>
-    <div id="timeline" class="mt-4" style="height: 1000px;"></div>
 
-</main><!-- /.container -->
-    <!-- タイムラインをクリックした時に表示するモーダルの内容 -->
-    <div class="modal fade" id="testModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">シフト編集</h4>
-                </div>
-                <div class="modal-body">
-                    <label>シフト希望を入力してください</label>
-                    <form action="" id="form">
-                        <div class="form-group">
-                            <label class="control-label">シフトID</label>
-                            <input class="form-control" type="number" id="shift_id" readonly><!--readonlyで編集不可-->
-                        </div>
-                        <div class="form-group">
+<!-- 新規シフト作成ボタンをクリックした時に表示するモーダルの内容 -->
+<div class="modal fade" id="submit-newshift-modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">新規シフト作成</h4>
+            </div>
+            <div class="modal-body">
+                <label>追加したいシフト情報を入力してください</label>
+                <form action="" id="form">
+                    <div class="form-group">
+                    <label class="control-label">従業員名</label><br>
+                    <select class="form-control" id="submit-newshift-member">
+                        {%for member in members%}
+                        <option value={{member.id}} >{{member.username}}</option>
+                        {%endfor%}
+                    </select>
+                    </div>
+                    <div class="form-group">
+                    <label class="control-label form-select">ポジション</label><br>
+                    <select class="form-control" id="submit-newshift-position">
+                        <option value="False">キッチン</option>
+                        <option value="True">ホール</option>
+                    </select>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">日付</label>
-                        <input class="form-control" type="date" id="date" readonly>
-                        </div>
-                        <div class="form-group">
-                        <label class="control-label">ポジション</label><br>
-                        <select class="form-control" name="position" id="position">
-                            <option value="False">キッチン</option>
-                            <option value="True">ホール</option>
-                        </select>
-                        </div>
-                        <div class="form-group">
+                        <input class="form-control" type="date" id="submit-newshift-date">
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">出勤</label>
-                        <input class="form-control" type="datetime-local" id="start">
-                        </div>
-                        <div class="form-group">
+                        <input class="form-control" type="datetime-local" id="submit-newshift-start">
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">退勤</label>
-                        <input class="form-control" type="datetime-local" id="end">
-                        </div>
-                        <div class="modal-footer">
+                        <input class="form-control" type="datetime-local" id="submit-newshift-end">
+                    </div>
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-                        <button type="button" class="btn btn-outline-danger" id="delete-shift">削除</button>
-                        <button type="button" class="btn btn-danger" type="submit" id="submit-shift">決定</button>
+                        <button type="button" class="btn btn-danger" type="submit" id="submit-newshift">決定</button>
+                </div>
 
-                    </div>
-    
-                    </form>
-                </div>
-                </div>
+                </form>
+            </div>
             </div>
         </div>
+    </div>
 
-           <!-- 新規シフト作成ボタンをクリックした時に表示するモーダルの内容 -->
-    <div class="modal fade" id="submit-newshift-modal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">新規シフト作成</h4>
-                </div>
-                <div class="modal-body">
-                    <label>追加したいシフト情報を入力してください</label>
-                    <form action="" id="form">
-                        <div class="form-group">
-                        <label class="control-label">従業員名</label><br>
-                        <select class="form-control" id="submit-newshift-member">
-                            {%for member in members%}
-                            <option value={{member.id}} >{{member.username}}</option>
-                            {%endfor%}
-                        </select>
-                        </div>
-                        <div class="form-group">
-                        <label class="control-label form-select">ポジション</label><br>
-                        <select class="form-control" id="submit-newshift-position">
-                            <option value="False">キッチン</option>
-                            <option value="True">ホール</option>
-                        </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label">日付</label>
-                            <input class="form-control" type="date" id="submit-newshift-date">
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label">出勤</label>
-                            <input class="form-control" type="datetime-local" id="submit-newshift-start">
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label">退勤</label>
-                            <input class="form-control" type="datetime-local" id="submit-newshift-end">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-                            <button type="button" class="btn btn-danger" type="submit" id="submit-newshift">決定</button>
-                    </div>
-    
-                    </form>
-                </div>
-                </div>
-            </div>
-        </div>
-
-    
-<script>
-  window.jQuery || document.write('<script src="{% static 'ShiftManagementApp/jquery-slim.min.js' %}"><\/script>')
-</script><script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script><script src="/docs/4.3/assets/js/vendor/anchor.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-</body>
-</html>
-
+{%endblock%}
