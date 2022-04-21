@@ -2,12 +2,13 @@ from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
 from email.policy import default
+from pickletools import read_unicodestring8
 from re import A, template
 from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
 from ShiftManagementApp.models import User,Shift
-from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount
+from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount,ContactForm
 from django.urls import reverse,reverse_lazy
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib.auth import authenticate, login, logout
@@ -83,6 +84,29 @@ def home(request):
     }
     return render(request,'ShiftManagementApp/index.html',context=params)
 
+#お問い合わせフォーム
+@login_required
+def contact(request):
+    if request.method == 'GET':
+        form = ContactForm()
+        params = {
+            'form':form,
+            'user_id':request.user.id
+        }
+        return render(request,"ShiftManagementApp/contact.html",params)
+    else:
+        form_raw = ContactForm(request.POST) #ユーザーID:1で送信されたformデータ（デフォルトで1になるようにしている）
+        if form_raw.is_valid():
+            form = form_raw.save(commit=False)
+            form.user = request.user #本来のユーザーIDで書き換える
+            form.save()
+            return HttpResponseRedirect(reverse('ShiftManagementApp:contact_success'))
+        else:
+            return render(request,"ShiftManagementApp/contact.html",{'form':form})
+
+@login_required
+def contact_success(request):
+    return render(request,'ShiftManagementApp/contact_success.html')
 #axiosの送信先
 @login_required
 def submitshift(request):
