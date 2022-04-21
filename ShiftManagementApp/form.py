@@ -1,3 +1,4 @@
+#from tkinter import Widget
 from django.forms import ModelForm
 from django import forms
 from ShiftManagementApp.models import Shift,User,Contact
@@ -9,9 +10,25 @@ class SubmitShift(ModelForm):
         fields = ('user','date','begin','finish')
 
 class ContactForm(ModelForm):
+
     class Meta:
+        def __init__(self,user):
+            self.current_user = user
         model = Contact
         fields = ('user','title','text')
+        '''
+        contactフォームを送信するときに無条件でユーザーID:1で送信する
+        ユーザーIDに何も入ってないと、不完全な状態であるためform.save(commit=False)がエラーを吐く
+        '''
+        widgets = {
+            'user':forms.NumberInput(attrs={
+                'class': 'form-control',
+                'type':'hidden',
+                'value':1
+                }),
+            'title':forms.TextInput(attrs={'class': 'form-control'}),
+            'text':forms.TextInput(attrs={'class': 'form-control'})
+        }
 
 class CreateAccount(forms.Form):
 

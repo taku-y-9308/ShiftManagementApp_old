@@ -95,9 +95,10 @@ def contact(request):
         }
         return render(request,"ShiftManagementApp/contact.html",params)
     else:
-        form = ContactForm(request.POST)
-        print(request.POST)
-        if form.is_valid():
+        form_raw = ContactForm(request.POST) #ユーザーID:1で送信されたformデータ（デフォルトで1になるようにしている）
+        if form_raw.is_valid():
+            form = form_raw.save(commit=False)
+            form.user = request.user #本来のユーザーIDで書き換える
             form.save()
             return HttpResponseRedirect(reverse('ShiftManagementApp:contact_success'))
         else:
