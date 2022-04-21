@@ -19,6 +19,7 @@ class ContactForm(ModelForm):
         '''
         contactフォームを送信するときに無条件でユーザーID:1で送信する
         ユーザーIDに何も入ってないと、不完全な状態であるためform.save(commit=False)がエラーを吐く
+        userはhiddenタグで非表示にしている
         '''
         widgets = {
             'user':forms.NumberInput(attrs={
