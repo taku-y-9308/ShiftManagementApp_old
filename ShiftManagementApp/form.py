@@ -1,5 +1,5 @@
 #from tkinter import Widget
-from django.forms import ModelForm
+from django.forms import ModelForm,Textarea
 from django import forms
 from ShiftManagementApp.models import Shift,User,Contact
 from django.contrib.auth.forms import UserCreationForm
@@ -12,8 +12,6 @@ class SubmitShift(ModelForm):
 class ContactForm(ModelForm):
 
     class Meta:
-        def __init__(self,user):
-            self.current_user = user
         model = Contact
         fields = ('user','title','text')
         '''
@@ -28,7 +26,7 @@ class ContactForm(ModelForm):
                 'value':1
                 }),
             'title':forms.TextInput(attrs={'class': 'form-control'}),
-            'text':forms.TextInput(attrs={'class': 'form-control'})
+            'text':Textarea(attrs={'class': 'form-control'})
         }
 
 class CreateAccount(forms.Form):
