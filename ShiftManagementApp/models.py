@@ -82,3 +82,8 @@ class Shift(models.Model):
     def __int__(self): 
         return self.user_id
     '''
+
+class Contact(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE,verbose_name="ユーザーID")
+    title = models.CharField("title",max_length=50)
+    text = models.CharField("text")

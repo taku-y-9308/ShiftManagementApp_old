@@ -1,0 +1,20 @@
+{% extends "ShiftManagementApp/base.html" %}
+{% load static %}
+
+{% block title%}
+ShiftManagementApp
+{%endblock%}
+
+{% block contents%}
+<form action="">
+    <div class="form-group">
+        <label class="control-label" for="title">お問い合わせタイトル</label>
+        <input class="form-control" type="text" id="title">
+    </div>
+    <div class="form-group">
+        <label class="control-label" for="text">本文</label>
+        <input class="form-control" type="text" id="text">
+    </div>
+    <button type="button" class="btn btn-danger" type="submit" id="submit-contact">送信</button>
+</form>
+{% endblock %}

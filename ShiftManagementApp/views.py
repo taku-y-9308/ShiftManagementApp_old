@@ -7,7 +7,7 @@ from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
 from ShiftManagementApp.models import User,Shift
-from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount
+from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount,ContactForm
 from django.urls import reverse,reverse_lazy
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib.auth import authenticate, login, logout
@@ -82,6 +82,13 @@ def home(request):
         'User':request.user
     }
     return render(request,'ShiftManagementApp/index.html',context=params)
+
+#お問い合わせフォーム
+@login_required
+def contact(request):
+    if request.method == 'GET':
+        form = ContactForm()
+        return render(request,"ShiftManagementApp/contact.html",{'form':form})
 
 #axiosの送信先
 @login_required

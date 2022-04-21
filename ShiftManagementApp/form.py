@@ -1,13 +1,18 @@
-#from dataclasses import field
+from dataclasses import field
 from django.forms import ModelForm
 from django import forms
-from ShiftManagementApp.models import Shift,User
+from ShiftManagementApp.models import Shift,User,Contact
 from django.contrib.auth.forms import UserCreationForm
 
 class SubmitShift(ModelForm):
     class Meta:
         model = Shift
         fields = ('user','date','begin','finish')
+
+class ContactForm(ModelForm):
+    class Meta:
+        model = Contact
+        fields = ('user','title','text')
 
 class CreateAccount(forms.Form):
 
