@@ -2,6 +2,7 @@ from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
 from email.policy import default
+from pickletools import read_unicodestring8
 from re import A, template
 from urllib import response
 from xmlrpc.client import boolean
@@ -88,8 +89,23 @@ def home(request):
 def contact(request):
     if request.method == 'GET':
         form = ContactForm()
-        return render(request,"ShiftManagementApp/contact.html",{'form':form})
+        params = {
+            'form':form,
+            'user_id':request.user.id
+        }
+        return render(request,"ShiftManagementApp/contact.html",params)
+    else:
+        form = ContactForm(request.POST)
+        print(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('ShiftManagementApp:contact_success'))
+        else:
+            return render(request,"ShiftManagementApp/contact.html",{'form':form})
 
+@login_required
+def contact_success(request):
+    return render(request,'ShiftManagementApp/contact_success.html')
 #axiosの送信先
 @login_required
 def submitshift(request):
