@@ -86,4 +86,4 @@ class Shift(models.Model):
 class Contact(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,verbose_name="ユーザーID")
     title = models.CharField("title",max_length=50)
-    text = models.CharField("text")
+    text = models.CharField("text",max_length=1000)
