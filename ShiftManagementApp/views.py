@@ -104,6 +104,7 @@ def contact(request):
         else:
             return render(request,"ShiftManagementApp/contact.html",{'form':form})
 
+#お問い合わせフォーム送信完了画面
 @login_required
 def contact_success(request):
     return render(request,'ShiftManagementApp/contact_success.html')
