@@ -10,7 +10,7 @@ http://shiftmanagementapp.com
 - HTML/CSS
   
 **バックエンド**
-- Python 3.6.5
+- Python 3.7.10
 - Django 3.2.13
   
 **インフラ**
