@@ -3,7 +3,7 @@
 http://shiftmanagementapp.com
 # 使用技術
 **フロントエンド**
-- JQuery 3.4.1
+- jQuery 3.4.1
 - Bootstrap 4.3.1
 - Googlechart
 - FullCalender 5.10.2
@@ -11,7 +11,7 @@ http://shiftmanagementapp.com
   
 **バックエンド**
 - Python 3.6.5
-- Django 3.2.12
+- Django 3.2.13
   
 **インフラ**
 - AWS
