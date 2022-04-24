@@ -124,13 +124,13 @@ def contact(request):
             '''
             subject = '新規のお問い合わせを受け付けました'
             text_content = f'新規のお問い合わせがありました。'\
-                'タイトル：{form.titie}'\
-                '本文：{form.text}'\
+                f'タイトル：{form.title}'\
+                f'内容：{form.text}'\
                 '確認はこちらからお願いします。'\
                 'http://shiftmanagementapp.com/admin'
             html_content = f'新規のお問い合わせがありました。<br>'\
-                'タイトル：{form.titie}<br>'\
-                '本文：{form.text}<br>'\
+                f'タイトル：{form.title} <br>'\
+                f'内容：{form.text} <br>'\
                 '確認はこちらからお願いします。<br>'\
                 '<a href="http://shiftmanagementapp.com/admin">http://shiftmanagementapp.com/admin</a>'
         
