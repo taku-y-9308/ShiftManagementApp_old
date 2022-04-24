@@ -102,6 +102,10 @@ def contact(request):
             form = form_raw.save(commit=False)
             form.user = request.user #本来のユーザーIDで書き換える
             form.save()
+
+            '''
+            メール送信（フォーム送信者用）
+            '''
             subject = 'お問い合わせありがとうございます'
             text_content = 'シフト管理アプリをご利用いただきましてありがとうございます。'\
                 'お問い合わせ受け付けました。'\
@@ -114,6 +118,27 @@ def contact(request):
             to_email = request.user.email
 
             send_email(subject,text_content,html_content,from_email,to_email)
+
+            '''
+            メール送信（管理者用）
+            '''
+            subject = '新規のお問い合わせを受け付けました'
+            text_content = f'新規のお問い合わせがありました。'\
+                'タイトル：{form.titie}'\
+                '本文：{form.text}'\
+                '確認はこちらからお願いします。'\
+                'http://shiftmanagementapp.com/admin'
+            html_content = f'新規のお問い合わせがありました。<br>'\
+                'タイトル：{form.titie}<br>'\
+                '本文：{form.text}<br>'\
+                '確認はこちらからお願いします。<br>'\
+                '<a href="http://shiftmanagementapp.com/admin">http://shiftmanagementapp.com/admin</a>'
+        
+            from_email = 'no-reply@shiftmanagementapp.com'
+            to_email = 'y.takumi4@gmail.com'
+
+            send_email(subject,text_content,html_content,from_email,to_email)
+
             return HttpResponseRedirect(reverse('ShiftManagementApp:contact_success'))
         
         #お問い合わせフォームに不備があった時
