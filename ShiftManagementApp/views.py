@@ -19,6 +19,7 @@ import json,datetime
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import Http404
+from django.core.mail import EmailMultiAlternatives
 
 #ログイン
 def Login(request):
@@ -96,11 +97,26 @@ def contact(request):
         return render(request,"ShiftManagementApp/contact.html",params)
     else:
         form_raw = ContactForm(request.POST) #ユーザーID:1で送信されたformデータ（デフォルトで1になるようにしている）
+        #バリデーションに問題がない時
         if form_raw.is_valid():
             form = form_raw.save(commit=False)
             form.user = request.user #本来のユーザーIDで書き換える
             form.save()
+            subject = 'お問い合わせありがとうございます'
+            text_content = 'シフト管理アプリをご利用いただきましてありがとうございます。'\
+                'お問い合わせ受け付けました。'\
+                '管理者から登録のメールアドレス宛に返信いたします。'
+            html_content = 'シフト管理アプリをご利用いただきましてありがとうございます。<br>'\
+                'お問い合わせ受け付けました。<br>'\
+                '管理者から登録のメールアドレス宛に返信いたします。<br>'\
+        
+            from_email = 'no-reply@shiftmanagementapp.com'
+            to_email = request.user.email
+
+            send_email(subject,text_content,html_content,from_email,to_email)
             return HttpResponseRedirect(reverse('ShiftManagementApp:contact_success'))
+        
+        #お問い合わせフォームに不備があった時
         else:
             return render(request,"ShiftManagementApp/contact.html",{'form':form})
 
@@ -351,6 +367,11 @@ def editshift_ajax_delete_shiftdata(request):
             })
         return JsonResponse(response,safe=False)
 
+#メール送信用
+def send_email(subject,text_content,html_content,from_email,to_emails):
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to_emails])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
 class PasswordReset(PasswordResetView):
     template_name = 'ShiftManagementApp/password_reset_form.html'
