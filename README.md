@@ -15,6 +15,6 @@ http://shiftmanagementapp.com
   
 **インフラ**
 - AWS
-    - EC2,SES,Route53
+    - EC2,S3,SES,Route53
 
 ![Untitled Diagram drawio-3](https://user-images.githubusercontent.com/66234583/165747183-8ef49fcf-704d-4a3e-8f4e-144f92033930.svg)
