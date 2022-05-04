@@ -84,8 +84,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default':env.db(),
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ShiftManagementApp',
+        'USER': env('USER'),
+        'PASSWORD': env('PASSWORD'),
+        'HOST': env('HOST'),
+        'PORT': '3306',
+    }
 }
+
 
 
 # Password validation
