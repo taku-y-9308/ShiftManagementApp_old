@@ -1,0 +1,16 @@
+{% extends "ShiftManagementApp/base.html" %}
+{% load static %}
+
+{% block title %}
+LINE連携
+{% endblock %}
+
+{%block header%}
+<link rel="stylesheet" href="{% static 'ShiftManagementApp/line.css' %}">
+{%endblock%}
+
+{% block contents%}
+<h6 class="text-center">LINEアカウント連携をする場合は下のボタンを押してください</h4> 
+<button type="button" class="btn btn-success btn-lg mt-5 d-block mx-auto" onclick="location.href='https://line.me/R/ti/p/%40012ztsml'">LINE連携</button>
+{% endblock %}
+
