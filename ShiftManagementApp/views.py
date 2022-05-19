@@ -1,3 +1,4 @@
+import json,datetime,secrets
 from asyncio import events
 from calendar import calendar
 from curses import reset_prog_mode
@@ -7,7 +8,7 @@ from re import A, template
 from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
-from ShiftManagementApp.models import User,Shift
+from ShiftManagementApp.models import User,Shift,LINE_USER_ID
 from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount,ContactForm
 from django.urls import reverse,reverse_lazy
 from django.shortcuts import get_object_or_404, render,redirect
@@ -15,24 +16,32 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
-import json,datetime
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import Http404
 from django.core.mail import EmailMultiAlternatives
 
-#ログイン
+"""
+ログイン
+"""
 def Login(request):
     if request.method == 'POST':
         EMAIL = request.POST.get('email')
         PASS = request.POST.get('password')
-
+        try:
+            next = request.POST.get('next')
+        except :
+            next = None
         user = authenticate(email=EMAIL, password=PASS)
 
         if user:
             if user.is_active:
                 login(request,user)
-                return HttpResponseRedirect(reverse('ShiftManagementApp:index'))
+                if next == None:
+                    return HttpResponseRedirect(reverse('ShiftManagementApp:index'))
+                else:
+                    return HttpResponseRedirect(next)
+
             else:
                 return HttpResponse("アカウントが有効ではありません")
         else:
@@ -43,15 +52,24 @@ def Login(request):
             return render(request,'ShiftManagementApp/login.html',params)
     # リクエストがGETだった場合
     else:
-        return render(request, 'ShiftManagementApp/login.html')
-#ログアウト
+        next = request.GET.get('next')
+        params = {
+            "next":next
+        }
+        return render(request, 'ShiftManagementApp/login.html',params)
+
+"""
+ログアウト
+"""
 @login_required
 def Logout(request):
     logout(request)
     
     return render(request, 'ShiftManagementApp/login.html')
 
-#新規アカウント作成
+"""
+新規アカウント作成
+"""
 def create_newaccount(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -63,7 +81,9 @@ def create_newaccount(request):
         form = SignUpForm()
     return render(request,'ShiftManagementApp/create_account.html',{'form': form})
 
-#ホーム
+"""
+ホーム
+"""
 @login_required
 def home(request):
     arr2 = []
@@ -85,7 +105,9 @@ def home(request):
     }
     return render(request,'ShiftManagementApp/index.html',context=params)
 
-#お問い合わせフォーム
+"""
+お問い合わせフォーム
+"""
 @login_required
 def contact(request):
     if request.method == 'GET':
@@ -151,12 +173,16 @@ def contact(request):
         else:
             return render(request,"ShiftManagementApp/contact.html",{'form':form})
 
-#お問い合わせフォーム送信完了画面
+"""
+お問い合わせフォーム送信完了画面
+"""
 @login_required
 def contact_success(request):
     return render(request,'ShiftManagementApp/contact_success.html')
 
-#シフト締め切り後編集モードの設定画面
+"""
+シフト締め切り後編集モードの設定画面
+"""
 @login_required
 def edit_shift_mode(request):
     if request.user.is_staff:
@@ -183,7 +209,9 @@ def edit_shift_mode(request):
         return render(request,'ShiftManagementApp/edit_shift_mode.html',params)
     else:
         return HttpResponse('アクセス権がありません')
-#axiosの送信先
+"""
+シフトの送信先
+"""
 @login_required
 def submitshift(request):
     if request.method == 'GET':
@@ -223,18 +251,6 @@ def submitshift(request):
             'res_code':True,
             'shift_id':product.id
         })
-        '''
-        for event in events:
-        
-            response.append({
-                'id':event.id,
-                'date':event.date,
-                'start':event.begin,
-                'end':event.finish,
-
-            })
-            #print(response)
-        '''
         print("編集可能")
         return JsonResponse(response,safe=False)
 
@@ -275,7 +291,7 @@ def Judge_editable(date_str):
         return False
 
 '''
-シフト編集画面のトップページ表示用
+シフト編集画面のトップページ表示
 '''
 @login_required
 def editshift(request):
@@ -428,13 +444,41 @@ def editshift_ajax_delete_shiftdata(request):
                 'res_code':False
             })
         return JsonResponse(response,safe=False)
-
-#メール送信用
+"""
+メール送信用
+"""
 def send_email(subject,text_content,html_content,from_email,to_emails):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to_emails])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
 
+"""
+LINEアカウント連携表示用
+"""
+@login_required
+def line(request):
+    return render(request,'ShiftManagementApp/line.html')
+
+"""
+LINEアカウント連携
+"""
+@login_required
+def account_linkage(request):
+    linkToken = request.GET.get('linkToken')
+    User = request.user
+    nonce = secrets.token_urlsafe(32)
+    LINE_USER_ID.objects.update_or_create(
+        user = User, #Userインスタンス自身を渡す
+        defaults = {
+            'nonce': nonce
+        }
+    )
+
+    return  HttpResponseRedirect(f'https://access.line.me/dialog/bot/accountLink?linkToken={linkToken}&nonce={nonce}')
+
+"""
+パスワードリセット
+"""
 class PasswordReset(PasswordResetView):
     template_name = 'ShiftManagementApp/password_reset_form.html'
     success_url = reverse_lazy('ShiftManagementApp:password_reset_done')
