@@ -424,6 +424,9 @@ def editshift_ajax_delete_shiftdata(request):
                 'res_code':True
             })
         except Exception as e:
+            response.append({
+                'res_code':False
+            })
             print(e)
         return JsonResponse(response,safe=False)
 
