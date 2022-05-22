@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function draw_calender() {
         axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
         axios.defaults.xsrfCookieName = "csrftoken"
         const date = moment(info.event.start).format('YYYY-MM-DD');
-        const start = moment(info.event.start).format('YYYY-MM-DDTHH:mm');
-        const end = moment(info.event.end).format('YYYY-MM-DDTHH:mm');
+        const start = moment(info.event.start).format('HH:mm');
+        const end = moment(info.event.end).format('HH:mm');
         $('#shift_id').val(info.event.id)//shiftのidはイベントのid
         $('#date').val(date);
         $('#start').val(start);
@@ -67,11 +67,11 @@ document.addEventListener('DOMContentLoaded', function draw_calender() {
                 })
                 let event = calendar.getEventById($('#shift_id').val())
                 event.remove();
-
+                console.log(typeof 42)
                 calendar.addEvent({
                 id : shift_id,
-                start : $('#start').val(),
-                end : $('#end').val(),
+                start : $('#date').val()+"T"+$('#start').val(),
+                end : $('#date').val()+"T"+$('#end').val(),
                 borderColor : '#ff0000',
                 })
                 calendar.render();
@@ -151,8 +151,8 @@ document.addEventListener('DOMContentLoaded', function draw_calender() {
                         //カレンダーに新しいイベントを追加
                         calendar.addEvent({
                             id : shift_id,
-                            start : $('#start').val(),
-                            end : $('#end').val(),
+                            start : $('#date').val()+"T"+$('#start').val(),
+                            end : $('#date').val()+"T"+$('#end').val(),
                             borderColor : '#ff0000',
                         });
                         alert("送信されました");   
