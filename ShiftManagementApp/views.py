@@ -219,12 +219,18 @@ def submitshift(request):
     print(request.body)
     datas = json.loads(request.body)
     print(datas)
+    print(f"startのtype:{type(datas['start'])}")
+    start_str = f"{datas['date']}T{datas['start']}"
+    start = datetime.datetime.strptime(start_str,'%Y-%m-%dT%H:%M')
+    #print(f"start_str:{start_str},start:{start},type(start):{type(start)}")
+    end_str = f"{datas['date']}T{datas['end']}"
+    end = datetime.datetime.strptime(end_str,'%Y-%m-%dT%H:%M')
     print(request.user.id)
     """
     送信された日付が現在編集可能な場合
     編集可能期間または編集モードのときにシフトを編集できる
     """
-    if (Judge_editable(datas['start']) == True or request.user.is_edit_mode == True):
+    if (Judge_editable(start_str) == True or request.user.is_edit_mode == True):
 
         '''
         ShiftのidをカレンダーのIDとして渡す
@@ -237,8 +243,8 @@ def submitshift(request):
             defaults = {
                 'user':request.user,
                 'date':datas['date'],
-                'begin':datas['start'],
-                'finish':datas['end'],
+                'begin':start,
+                'finish':end,
                 'position': default_position
             }
         )
@@ -330,9 +336,9 @@ def editshift_ajax(request):
         print(json_data)
 
         arr2 = []
-        #該当のシフトを取得
-        shifts = Shift.objects.select_related('user').filter(date=date)
-        #print(shifts[0].user.shop_id)
+        #該当のシフトを取得(User.idの昇順で並び替える)
+        shifts = Shift.objects.select_related('user').filter(date=date).order_by('user__id')
+        
         for shift in shifts:
             #管理ユーザーと同じshop_idのシフトのみ表示（他店のシフトは表示しない）
             if shift.user.shop_id == request.user.shop_id:
@@ -353,7 +359,6 @@ def editshift_ajax(request):
                     'end':shift.finish,
                 }
                 arr2.append(arr)
-        
         return JsonResponse(arr2,safe=False)
     #staffユーザーではない場合
     else:
