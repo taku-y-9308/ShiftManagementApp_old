@@ -302,18 +302,14 @@ def Judge_editable(date_str):
 @login_required
 def editshift(request):
 
-    #スタッフユーザー(管理ユーザー)のみ実行可 
-    if request.user.is_staff:
-        members = User.objects.filter(shop_id=request.user.shop_id)
+    members = User.objects.filter(shop_id=request.user.shop_id)
+    user = request.user
+    params = {
+        'members':members,
+        'User':user
+    }
+    return render(request,'ShiftManagementApp/editshift.html',params)
 
-        params = {
-            'members':members
-        }
-        return render(request,'ShiftManagementApp/editshift.html',params)
-    
-    #staffユーザーではない場合
-    else:
-        return HttpResponse('アクセス権がありません')
 
 '''
 【シフト編集画面】
@@ -322,50 +318,44 @@ def editshift(request):
 '''
 @login_required
 def editshift_ajax(request):
+    #GETリクエストなら404を返す
+    if request.method == 'GET':
+        raise Http404()
 
-    #スタッフユーザー(管理ユーザー)のみ実行可 
-    if request.user.is_staff:
-        print(request.user.is_staff)
+    json_data = json.loads(request.body)
+    date = json_data['date']
+    print(json_data)
 
-        #GETリクエストなら404を返す
-        if request.method == 'GET':
-            raise Http404()
+    arr2 = []
+    #該当のシフトを取得(User.idの昇順で並び替える)
+    shifts = Shift.objects.select_related('user').filter(date=date).order_by('user__id')
+    
+    for shift in shifts:
+        #管理ユーザーと同じshop_idのシフトのみ表示（他店のシフトは表示しない）
+        if shift.user.shop_id == request.user.shop_id:
+            name = User.objects.get(id=shift.user.id).username
+            print(name)
+            #positionによってバーに適用する色を変える
+            position = shift.position
+            if position == True:
+                style = '#0000ff' #blue
+            else:
+                style = '#ff0000' #red
+            arr = {
+                'shift_id':shift.id,
+                'name':name,
+                'date':shift.date,
+                'style':style,
+                'start':shift.begin,
+                'end':shift.finish,
+            }
+            arr2.append(arr)
+    return JsonResponse(arr2,safe=False)
 
-        json_data = json.loads(request.body)
-        date = json_data['date']
-        print(json_data)
-
-        arr2 = []
-        #該当のシフトを取得(User.idの昇順で並び替える)
-        shifts = Shift.objects.select_related('user').filter(date=date).order_by('user__id')
-        
-        for shift in shifts:
-            #管理ユーザーと同じshop_idのシフトのみ表示（他店のシフトは表示しない）
-            if shift.user.shop_id == request.user.shop_id:
-                name = User.objects.get(id=shift.user.id).username
-                print(name)
-                #positionによってバーに適用する色を変える
-                position = shift.position
-                if position == True:
-                    style = '#0000ff' #blue
-                else:
-                    style = '#ff0000' #red
-                arr = {
-                    'shift_id':shift.id,
-                    'name':name,
-                    'date':shift.date,
-                    'style':style,
-                    'start':shift.begin,
-                    'end':shift.finish,
-                }
-                arr2.append(arr)
-        return JsonResponse(arr2,safe=False)
-    #staffユーザーではない場合
-    else:
-        return HttpResponse('アクセス権がありません')
 
 
 '''
+【管理者のみ】
 【シフト編集画面】
 シフトデータを新規追加or編集したときの送信先
 '''

@@ -39,12 +39,12 @@
                 <li class="nav-item">
                   <a class="nav-link" href="{%url 'ShiftManagementApp:index'%}">ホーム</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">管理者メニュー</a>
-                    <div class="dropdown-menu">
-                      <a class="dropdown-item" href="{%url 'ShiftManagementApp:edit-shift'%}">シフト編集</a>
-                      <a class="dropdown-item" href="{% url 'ShiftManagementApp:edit-shift-mode'%}">シフト締め切り後編集モード</a>
-                    </div>
+                <li class="nav-item">
+                {% if user.is_staff %}
+                  <a class="nav-link" href="{%url 'ShiftManagementApp:edit-shift'%}">シフト閲覧/編集</a>
+                {% else %}
+                  <a class="nav-link" href="{%url 'ShiftManagementApp:edit-shift'%}">シフト閲覧</a>
+                {%endif%}
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="{%url 'ShiftManagementApp:contact'%}">お問い合わせ</a>
@@ -52,6 +52,14 @@
                <li class="nav-item">
                 <a class="nav-link" href="{%url 'ShiftManagementApp:line'%}">LINE連携</a>
               </li>
+              {% if user.is_staff %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">管理者メニュー</a>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="{% url 'ShiftManagementApp:edit-shift-mode'%}">シフト締め切り後編集モード</a>
+                </div>
+              </li>
+              {%endif%}
                 <li class="nav-item">
                     <a class="nav-link" href="{%url 'ShiftManagementApp:Logout' %}">ログアウト</a>
                 </li>
