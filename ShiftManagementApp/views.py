@@ -1,10 +1,11 @@
-import json,datetime,secrets
+import json,datetime,secrets,calendar
 from asyncio import events
-from calendar import calendar
 from curses import reset_prog_mode
 from email.policy import default
 from pickletools import read_unicodestring8
 from re import A, template
+from this import d
+from tracemalloc import start
 from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
@@ -99,11 +100,91 @@ def home(request):
 		    'editable': 'true'
         }
         arr2.append(arr)
+    range_to_be_displayed= calc_range_to_be_displayed(request.user)
     params = {
         'shift':arr2,
-        'User':request.user
+        'User':request.user,
+        'start_date':range_to_be_displayed['start_date'],
+        'end_date':range_to_be_displayed['end_date']
     }
     return render(request,'ShiftManagementApp/index.html',context=params)
+
+"""
+カレンダーの表示範囲を計算
+引数:アクセスしているUserオブジェクト
+"""
+def calc_range_to_be_displayed(User):
+    t_delta = datetime.timedelta(hours=9)
+    JST = datetime.timezone(t_delta, 'JST')
+    now_JST = datetime.datetime.now(JST)
+    now_JST_str = now_JST.strftime('%Y-%m-%dT%H:%M') #YYYY-MM-ddTHH:mm形式の文字列に変換
+
+    #編集可能期間内の時 or ユーザーが編集モードの時
+    if Judge_editable(now_JST_str) or User.is_edit_mode:
+        start_date = get_first_date(now_JST,-1)
+        end_date = get_last_date(now_JST,1)
+        range_to_be_displayed = {
+            'start_date': start_date.strftime('%Y-%m-%d'),
+            'end_date': end_date.strftime('%Y-%m-%d')
+        }
+
+    else:
+        start_date = get_first_date(now_JST,-1)
+        end_date = get_last_date(now_JST,0)
+        range_to_be_displayed = {
+            'start_date': start_date.strftime('%Y-%m-%d'),
+            'end_date': end_date.strftime('%Y-%m-%d')
+        }
+
+    return range_to_be_displayed
+"""
+引数
+dt:
+date,datetimeオブジェクト
+
+target_month:
+defalut=0
+-1:前月
+0:当月
+1:来月
+
+返り値:指定のtargetmonthの月初めdatetimeオブジェクト
+"""
+
+def get_first_date(dt,target_month=0):
+    if not -1 <= target_month <= 1:
+        raise ValueError("target_monthは-1~1の範囲である必要があります")
+
+    if dt.month+target_month < 1:
+        return dt.replace(year=dt.year-1,month=12,day=1)
+    elif dt.month+target_month > 12:
+        return dt.replace(year=dt.year+1,month=1,day=1)
+    else:
+        return dt.replace(month=dt.month+target_month,day=1)
+
+"""
+引数
+dt:
+date,datetimeオブジェクト
+
+target_month:
+defalut=0
+-1:前月
+0:当月
+1:来月
+
+返り値:指定のtargetmonthの月末datetimeオブジェクト
+"""
+def get_last_date(dt,target_month=0):
+    if not -1 <= target_month <= 1:
+        raise ValueError("target_monthは-1~1の範囲である必要があります")
+
+    if dt.month+target_month < 1:
+        return dt.replace(month=12,day=calendar.monthrange(dt.year-1,12)[1])
+    elif dt.month+target_month > 12:
+        return dt.replace(month=1,day=calendar.monthrange(dt.year+1,1)[1])
+    else:
+        return dt.replace(month=dt.month+target_month,day=calendar.monthrange(dt.year,dt.month+target_month)[1])
 
 """
 お問い合わせフォーム

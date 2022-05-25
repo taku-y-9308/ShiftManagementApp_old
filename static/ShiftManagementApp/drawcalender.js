@@ -2,7 +2,15 @@
 document.addEventListener('DOMContentLoaded', function draw_calender() {
   var calendarEl = document.getElementById('calendar');
   let eventData = JSON.parse(document.getElementById("event-data").textContent);
+  let start_date = document.getElementById("start_date").textContent.replace(/"/g,'');
+  let end_date = document.getElementById("end_date").textContent.replace(/"/g,'');
+  console.log(typeof(start_date));
+  console.log(start_date);
   var calendar = new FullCalendar.Calendar(calendarEl, {
+    validRange: {
+        start: start_date,
+        end: end_date
+    },
     locale: 'ja',
     displayEventEnd :true,
     headerToolbar: {
@@ -10,6 +18,10 @@ document.addEventListener('DOMContentLoaded', function draw_calender() {
       center: 'title',
       right: 'listMonth,dayGridMonth,timeGridWeek'
     },
+    dayCellContent: function (e) {
+        e.dayNumberText = e.dayNumberText.replace('日', '');
+    },
+    eventDisplay:'block',
     navLinks: false, // can click day/week names to navigate views
     editable: true,
     selectable: true,
