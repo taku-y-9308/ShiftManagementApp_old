@@ -9,7 +9,7 @@ from tracemalloc import start
 from urllib import response
 from xmlrpc.client import boolean
 from django.views import generic
-from ShiftManagementApp.models import User,Shift,LINE_USER_ID
+from ShiftManagementApp.models import User,Shift,LINE_USER_ID,Publish_range
 from ShiftManagementApp.form import SubmitShift,SignUpForm,CreateAccount,ContactForm
 from django.urls import reverse,reverse_lazy
 from django.shortcuts import get_object_or_404, render,redirect
@@ -114,28 +114,30 @@ def home(request):
 引数:アクセスしているUserオブジェクト
 """
 def calc_range_to_be_displayed(User):
+
+    
     t_delta = datetime.timedelta(hours=9)
     JST = datetime.timezone(t_delta, 'JST')
     now_JST = datetime.datetime.now(JST)
     now_JST_str = now_JST.strftime('%Y-%m-%dT%H:%M') #YYYY-MM-ddTHH:mm形式の文字列に変換
 
-    #編集可能期間内の時 or ユーザーが編集モードの時
-    if Judge_editable(now_JST_str) or User.is_edit_mode:
+    #edit_modeがTrueの時は、公開設定に関わらず翌月末までのシフトを表示する
+    if User.is_edit_mode:
         start_date = get_first_date(now_JST,-1)
         end_date = get_last_date(now_JST,1)
         range_to_be_displayed = {
             'start_date': start_date.strftime('%Y-%m-%d'),
             'end_date': end_date.strftime('%Y-%m-%d')
         }
-
-    #編集可能期間外の時
     else:
         start_date = get_first_date(now_JST,-1)
-        end_date = get_last_date(now_JST,0)
+        end_date = Publish_range.objects.get(id=1).Publish_shift_end
         range_to_be_displayed = {
             'start_date': start_date.strftime('%Y-%m-%d'),
             'end_date': end_date.strftime('%Y-%m-%d')
         }
+
+
 
     return range_to_be_displayed
 """
@@ -409,8 +411,12 @@ def editshift_ajax(request):
     print(json_data)
 
     arr2 = []
-    #該当のシフトを取得(User.idの昇順で並び替える)
-    shifts = Shift.objects.select_related('user').filter(date=date).order_by('user__id')
+    
+    #該当のシフトを取得(User.idの昇順で並び替える),管理者かそうでないかで取得するシフトを変える
+    if request.user.is_staff:
+        shifts = Shift.objects.select_related('user').filter(date=date).order_by('user__id')
+    else:
+        shifts = Shift.objects.select_related('user').filter(date=date,publish=True).order_by('user__id')
     
     for shift in shifts:
         #管理ユーザーと同じshop_idのシフトのみ表示（他店のシフトは表示しない）
@@ -529,6 +535,30 @@ def editshift_ajax_delete_shiftdata(request):
                 'res_code':False
             })
         return JsonResponse(response,safe=False)
+
+@login_required
+def edit_shift_publish_shift(request):
+    if request.method == 'GET':
+        raise Http404()
+    if request.user.is_staff:
+        publish_range = json.loads(request.body)
+        publish_start = publish_range['publish_shift_start']
+        publish_end = publish_range['publish_shift_end']
+
+        #公開範囲のShiftのpublishをTrueにする
+        Shift.objects.filter(date__gte=publish_start,date__lte=publish_end).update(publish=True)
+
+        Publish_range.objects.update_or_create(
+            id=1,
+            defaults={
+                'Publish_shift_start':publish_start,
+                'Publish_shift_end':publish_end
+
+            }
+        )
+    response = {}
+    return JsonResponse(response)
+    
 """
 メール送信用
 """
