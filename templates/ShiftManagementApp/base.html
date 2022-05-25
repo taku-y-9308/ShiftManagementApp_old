@@ -1,5 +1,7 @@
 {% load static %}
 {{ shift|json_script:"event-data" }}
+{{start_date|json_script:"start_date"}}
+{{end_date|json_script:"end_date"}}
 <!doctype html>
 <html lang="ja">
   <head>
