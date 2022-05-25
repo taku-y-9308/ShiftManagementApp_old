@@ -128,6 +128,7 @@ def calc_range_to_be_displayed(User):
             'end_date': end_date.strftime('%Y-%m-%d')
         }
 
+    #編集可能期間外の時
     else:
         start_date = get_first_date(now_JST,-1)
         end_date = get_last_date(now_JST,0)
