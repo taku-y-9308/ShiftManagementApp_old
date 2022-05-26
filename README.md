@@ -1,7 +1,7 @@
 # 概要
 シフト提出、編集、閲覧をスマホから簡単に行えるWebアプリです。  
 http://shiftmanagementapp.com  
-  
+# 特徴
 - トップページは今月のシフトがひと目で確認できるカレンダー仕様
 ![スクリーンショット 2022-05-23 22 19 45](https://user-images.githubusercontent.com/66234583/169828627-0a3dbe51-1366-47b6-90d1-c879243eb278.png)  
   
@@ -10,6 +10,10 @@ http://shiftmanagementapp.com
   
 - 特定の日のシフト確認はわかりやすいタイムラインを使用
 ![スクリーンショット 2022-05-23 22 18 20](https://user-images.githubusercontent.com/66234583/169828999-808f107d-e428-4fc6-b665-2b2036b0b669.png)  
+## その他特徴
+- LINE MessagingAPIを用いたアカウント連携とシフト前日のLINE通知機能([herokuデプロイ版](https://github.com/taku-y-9308/ShiftManagementApp-heroku)にて提供)
+- シフト編集モード機能で締め切り後でも一時的に提出できるようにする救済モード
+- ユーザーの状態、時期によってカレンダーの表示範囲を動的に変更
 # 使用技術
 **フロントエンド**
 - jQuery 3.4.1
