@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/',views.Login,name = 'Login'),
     path('logout/',views.Logout,name ='Logout'),
     path('create-newaccount/',views.create_newaccount,name='create-newaccount'),
+    path('submit-shift/',views.submit_shift,name="submit-shift"),
     #path('SubmitShift/',views.SubmitShift.as_view(),name = 'SubmitShift'),
     path('SubmitShift-Ajax/',views.submitshift,name='SubmitShift-Ajax'),
     path('edit-shift/',views.editshift,name='edit-shift'),

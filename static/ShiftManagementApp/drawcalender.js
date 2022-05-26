@@ -1,11 +1,10 @@
-/*カレンダー描画***********/
+/*ホームのカレンダー描画***********/
 document.addEventListener('DOMContentLoaded', function draw_calender() {
   var calendarEl = document.getElementById('calendar');
   let eventData = JSON.parse(document.getElementById("event-data").textContent);
   let start_date = document.getElementById("start_date").textContent.replace(/"/g,'');
   let end_date = document.getElementById("end_date").textContent.replace(/"/g,'');
-  console.log(typeof(start_date));
-  console.log(start_date);
+  console.log(end_date);
   var calendar = new FullCalendar.Calendar(calendarEl, {
     validRange: {
         start: start_date,
@@ -23,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function draw_calender() {
     },
     eventDisplay:'block',
     navLinks: false, // can click day/week names to navigate views
-    editable: true,
-    selectable: true,
+    editable: false,
+    selectable: false,
     eventBackgroundColor:'ff0000',
     contentHeight: 'auto',
     selectLongPressDelay:0,
