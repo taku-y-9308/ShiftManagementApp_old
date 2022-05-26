@@ -3,13 +3,16 @@
 http://shiftmanagementapp.com  
 # 特徴
 - トップページは今月のシフトがひと目で確認できるカレンダー仕様
-![スクリーンショット 2022-05-23 22 19 45](https://user-images.githubusercontent.com/66234583/169828627-0a3dbe51-1366-47b6-90d1-c879243eb278.png)  
+![スクリーンショット 2022-05-26 17 36 11](https://user-images.githubusercontent.com/66234583/170451739-9a803d85-5831-43d0-96c7-d349bc9f2a88.png)  
   
 - 日付クリックで非同期でシフトをサーバーに送信
-![スクリーンショット 2022-05-23 22 17 46](https://user-images.githubusercontent.com/66234583/169828931-9b50eb76-82c1-4fe0-ad03-82edeca34d52.png)  
+![スクリーンショット 2022-05-26 17 36 00](https://user-images.githubusercontent.com/66234583/170451672-6c52b051-f6e0-41f8-8193-f4af99976435.png)  
   
 - 特定の日のシフト確認はわかりやすいタイムラインを使用
-![スクリーンショット 2022-05-23 22 18 20](https://user-images.githubusercontent.com/66234583/169828999-808f107d-e428-4fc6-b665-2b2036b0b669.png)  
+![スクリーンショット 2022-05-26 17 36 56](https://user-images.githubusercontent.com/66234583/170451571-5ee56d35-6238-41bb-8894-d330fe39de35.png)  
+
+- 管理者はタイムラインクリックからシフト編集が可能
+![スクリーンショット 2022-05-26 17 40 03](https://user-images.githubusercontent.com/66234583/170452082-461ce166-0b7f-4331-9a77-6594252cb33b.png)  
 ## その他特徴
 - LINE MessagingAPIを用いたアカウント連携とシフト前日のLINE通知機能([herokuデプロイ版](https://github.com/taku-y-9308/ShiftManagementApp-heroku)にて提供)
 - シフト編集モード機能で締め切り後でも一時的に提出できるようにする救済モード
