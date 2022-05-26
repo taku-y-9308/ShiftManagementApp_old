@@ -100,50 +100,69 @@ def home(request):
 		    'editable': 'true'
         }
         arr2.append(arr)
-    range_to_be_displayed= calc_range_to_be_displayed(request.user)
-    params = {
-        'shift':arr2,
-        'User':request.user,
-        'start_date':range_to_be_displayed['start_date'],
-        'end_date':range_to_be_displayed['end_date']
-    }
-    return render(request,'ShiftManagementApp/index.html',context=params)
-
-"""
-カレンダーの表示範囲を計算
-引数:アクセスしているUserオブジェクト
-"""
-def calc_range_to_be_displayed(User):
-
     
+    #カレンダーの表示範囲を公開設定されている範囲のみ表示する
     t_delta = datetime.timedelta(hours=9)
     JST = datetime.timezone(t_delta, 'JST')
     now_JST = datetime.datetime.now(JST)
     now_JST_str = now_JST.strftime('%Y-%m-%dT%H:%M') #YYYY-MM-ddTHH:mm形式の文字列に変換
 
-    #edit_modeがTrueの時は、公開設定に関わらず翌月末までのシフトを表示する
-    if User.is_edit_mode:
-        start_date = get_first_date(now_JST,-1)
+    start_date = get_first_date(now_JST,-1)
+    try:
+        end_date = Publish_range.objects.get(id=1).Publish_shift_end
+    except:
         end_date = get_last_date(now_JST,1)
-        range_to_be_displayed = {
-            'start_date': start_date.strftime('%Y-%m-%d'),
-            'end_date': end_date.strftime('%Y-%m-%d')
-        }
-    else:
-        start_date = get_first_date(now_JST,-1)
-        try:
-            end_date = Publish_range.objects.get(id=1).Publish_shift_end
-        except:
-            end_date = get_last_date(now_JST,1)
-        range_to_be_displayed = {
-            'start_date': start_date.strftime('%Y-%m-%d'),
-            'end_date': end_date.strftime('%Y-%m-%d')
-        }
 
+    params = {
+        'shift':arr2,
+        'User':request.user,
+        'start_date':start_date.strftime('%Y-%m-%d'),
+        'end_date':end_date.strftime('%Y-%m-%d')
+    }
+    return render(request,'ShiftManagementApp/index.html',context=params)
 
-
-    return range_to_be_displayed
 """
+シフト提出画面
+"""
+@login_required
+def submit_shift(request):
+    arr2 = []
+    shifts = Shift.objects.filter(user=request.user.id)
+    for shift in shifts:
+        arr = {
+            'id':shift.id,
+            'titie':'TEST',
+            'start':shift.begin,
+            'end':shift.finish,
+            'backgroundColor': "red",
+		    'borderColor': "red",
+		    'editable': 'true'
+        }
+        arr2.append(arr)
+
+    #カレンダーの表示範囲を設定
+    t_delta = datetime.timedelta(hours=9)
+    JST = datetime.timezone(t_delta, 'JST')
+    now_JST = datetime.datetime.now(JST)
+
+    #編集モードがTrueのユーザーは今月と来月を表示
+    if request.user.is_edit_mode:
+        start_date = get_first_date(now_JST,0)
+        end_date = get_last_date(now_JST,1)
+    #それ以外のユーザーは来月のみ表示
+    else:
+        start_date = get_first_date(now_JST,1)
+        end_date = get_last_date(now_JST,1)     
+    params = {
+        'shift':arr2,
+        'User':request.user,
+        'start_date':start_date.strftime('%Y-%m-%d'),
+        'end_date':end_date.strftime('%Y-%m-%d')
+    }
+    return render(request,'ShiftManagementApp/submit_shift.html',context=params)
+
+"""
+指定した月の月初めdatetimeオブジェクトを返す
 引数
 dt:
 date,datetimeオブジェクト
@@ -169,6 +188,7 @@ def get_first_date(dt,target_month=0):
         return dt.replace(month=dt.month+target_month,day=1)
 
 """
+指定した月の月末datetimeオブジェクトを返す
 引数
 dt:
 date,datetimeオブジェクト
@@ -539,6 +559,9 @@ def editshift_ajax_delete_shiftdata(request):
             })
         return JsonResponse(response,safe=False)
 
+"""
+シフトの公開設定
+"""
 @login_required
 def edit_shift_publish_shift(request):
     if request.method == 'GET':
@@ -546,7 +569,9 @@ def edit_shift_publish_shift(request):
     if request.user.is_staff:
         publish_range = json.loads(request.body)
         publish_start = publish_range['publish_shift_start']
-        publish_end = publish_range['publish_shift_end']
+
+        #タイムゾーンの関係でカレンダーのendが１日少なく表示されてしまうため+1する
+        publish_end = datetime.datetime.strptime( publish_range['publish_shift_end'],'%Y-%m-%d') + datetime.timedelta(days=1)
 
         #公開範囲のShiftのpublishをTrueにする
         Shift.objects.filter(date__gte=publish_start,date__lte=publish_end).update(publish=True)
